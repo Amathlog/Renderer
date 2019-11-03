@@ -13,6 +13,9 @@ Triangle::Triangle(const std::vector<float>& data)
     {
         std::cerr << "ERROR WHILE BUILDING TRIANGLE, FORMAT NOT RESPECTED" << std::endl;
     }
+
+    CreateShader();
+
     glGenVertexArrays(1, &m_VAO); 
     glGenBuffers(1, &m_VBO);
 
@@ -39,9 +42,10 @@ Triangle::~Triangle()
 
 void Triangle::CreateShader()
 {
-    m_shader = new Shader("/home/adrien/Programming/Renderer/shaders/shader.vs",
-                          "/home/adrien/Programming/Renderer/shaders/shader.fs");
-    std::cout << m_shader << std::endl; 
+    //m_shader = new Shader("/home/adrien/Programming/Renderer/shaders/shader.vs",
+    //                      "/home/adrien/Programming/Renderer/shaders/shader.fs");
+    m_shader = new Shader("C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.vs",
+        "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
 }
 
 void Triangle::Draw() const

@@ -10,7 +10,6 @@ public:
     Renderable()
     {
         m_ID = ++CURRENT_ID;
-        CreateShader();
     }
 
     virtual ~Renderable()
@@ -22,7 +21,7 @@ public:
         }
     }
 
-    virtual void CreateShader(){}
+    virtual void CreateShader() = 0;
     virtual void Draw() const = 0;
 
     const glm::mat4& GetTransform() const {return m_transform;}

@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-class GLFWwindow;
+struct GLFWwindow;
 class Shader;
 class Renderable;
 

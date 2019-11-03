@@ -9,8 +9,19 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Include OpenGL
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
+include_directories(${OPENGL_INCLUDE_DIRS})
+
+# Include GLUT
+if(WIN32)
+    set(GLUT_INCLUDE_DIR "external/glut/include")
+    set(OPENGL_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/external/glut/lib")
+    # set(GLUT_LIBRARY "${CMAKE_SOURCE_DIR}/external/glut/lib/x64/freeglut")
+    find_package(GLUT REQUIRED)
+    include_directories(${GLUT_INCLUDE_DIR})
+else(WIN32)
+    find_package(GLUT REQUIRED)
+    include_directories(${GLUT_INCLUDE_DIRS})
+endif(WIN32)
 
 # Include GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
