@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <gtc/type_ptr.hpp>
+
 #include <iostream>
 
 Triangle::Triangle(const std::vector<float>& data)
@@ -42,10 +44,10 @@ Triangle::~Triangle()
 
 void Triangle::CreateShader()
 {
-    //m_shader = new Shader("/home/adrien/Programming/Renderer/shaders/shader.vs",
-    //                      "/home/adrien/Programming/Renderer/shaders/shader.fs");
-    m_shader = new Shader("C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.vs",
-        "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
+    m_shader = new Shader("/home/adrien/Programming/Renderer/shaders/shader.vs",
+                         "/home/adrien/Programming/Renderer/shaders/shader.fs");
+    // m_shader = new Shader("C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.vs",
+    //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
 }
 
 void Triangle::Draw() const
@@ -54,6 +56,10 @@ void Triangle::Draw() const
         return;
 
     m_shader->Use();
+
+    unsigned int transformLoc = glGetUniformLocation(m_shader->m_ID, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(m_transform));
+
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
