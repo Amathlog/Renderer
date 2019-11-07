@@ -5,7 +5,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <gtc/type_ptr.hpp>
 #include <gtx/string_cast.hpp> 
 
 #include <iostream>
@@ -52,17 +51,16 @@ void Triangle::CreateShader()
     //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
 }
 
-void Triangle::Draw(const Camera& camera) const
+void Triangle::Draw(const glm::mat4& mvp) const
 {
     if (m_shader == nullptr)
         return;
 
     m_shader->Use();
 
-    glm::mat4 MVP = camera.GetProjectionMatrix() * camera.GetViewMatrix() * m_transform;
+    glm::mat4 new_MVP = mvp * m_transform;
 
-    unsigned int mvpLoc = glGetUniformLocation(m_shader->m_ID, "MVP");
-    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+    m_shader->SetMat4("MVP", new_MVP);
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);

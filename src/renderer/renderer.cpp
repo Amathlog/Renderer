@@ -71,10 +71,13 @@ void Renderer::Render()
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Compute PV matrix
+    glm::mat4 PV = m_camera.GetProjectionMatrix() * m_camera.GetViewMatrix();
     
     for (auto pair : m_mapToRenderable)
     {
-        pair.second->Draw(m_camera);
+        pair.second->Draw(PV);
     }
 
     glfwSwapBuffers(m_window);

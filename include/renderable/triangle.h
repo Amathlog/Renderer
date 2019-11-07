@@ -12,7 +12,7 @@ public:
     virtual ~Triangle();
 
     virtual void CreateShader() override;
-    virtual void Draw(const Camera& camera) const override;
+    virtual void Draw(const glm::mat4& camera) const override;
 
 protected:
     unsigned int m_VBO;

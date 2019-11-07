@@ -4,8 +4,6 @@
 #include "shaders/shaders.h"
 #include <iostream>
 
-class Camera;
-
 class Renderable
 {
 public:
@@ -24,7 +22,7 @@ public:
     }
 
     virtual void CreateShader() = 0;
-    virtual void Draw(const Camera& camera) const = 0;
+    virtual void Draw(const glm::mat4& mvp) const = 0;
 
     const glm::mat4& GetTransform() const {return m_transform;}
     void SetTransform(const glm::mat4& transform) {m_transform = transform;}
