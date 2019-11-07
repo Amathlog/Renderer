@@ -14,7 +14,7 @@
 #define WINDOW_HEIGHT 600
 #define FPS 60
 
-//#define PROFILING
+// #define PROFILING
 
 int main()
 {
@@ -23,12 +23,21 @@ int main()
     if(errorCode != 0)
         return errorCode;
 
+    // Setup the camera
+    Camera& camera = renderer->GetCamera();
+    camera.SetIsOrthographic();
+    camera.SetPosition(glm::vec3(0.0f, 0.0f, -1.0f));
+    camera.SetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
+    camera.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
+    Camera::OrthographicParams& params = camera.GetOrthographicParams();
+    params = {-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f};
+
     // Create a triangle and add it to the renderer
     std::vector<float> vertices = {
         // positions         // colors
-        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+        0.5f, -0.5f, 0.5f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,   // bottom left
+        0.0f,  0.5f, 0.5f,  0.0f, 0.0f, 1.0f    // top 
     };
     Triangle triangle(vertices);
     renderer->AddRenderable(&triangle);

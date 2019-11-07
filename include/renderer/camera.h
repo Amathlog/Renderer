@@ -7,10 +7,10 @@ class Camera
 public:
     struct OrthographicParams
     {
-        float top;
-        float bottom;
         float left;
         float right;
+        float bottom;
+        float top;
         float near;
         float far;
 

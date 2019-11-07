@@ -43,6 +43,8 @@ int Renderer::Initialize(unsigned int width, unsigned int height)
     framebuffer_size_callback(m_window, width, height);
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
+    glEnable(GL_DEPTH_TEST);
+
     return 0;
 }
 
@@ -68,11 +70,11 @@ void Renderer::Render()
         return;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     for (auto pair : m_mapToRenderable)
     {
-        pair.second->Draw();
+        pair.second->Draw(m_camera);
     }
 
     glfwSwapBuffers(m_window);
@@ -86,6 +88,26 @@ void Renderer::ProcessInput()
 
     if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window, true);
+
+    constexpr float factor = 0.05f;
+
+    if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.left += factor;
+        params.right -= factor;
+        params.bottom += factor;
+        params.top -= factor;
+    }
+
+    if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.left -= factor;
+        params.right += factor;
+        params.bottom -= factor;
+        params.top += factor;
+    }
 }
 
 bool Renderer::RequestedClose()

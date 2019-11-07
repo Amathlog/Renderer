@@ -1,10 +1,12 @@
 #include "renderable/triangle.h"
+#include "renderer/camera.h"
 #include "shaders/shaders.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <gtc/type_ptr.hpp>
+#include <gtx/string_cast.hpp> 
 
 #include <iostream>
 
@@ -50,15 +52,17 @@ void Triangle::CreateShader()
     //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
 }
 
-void Triangle::Draw() const
+void Triangle::Draw(const Camera& camera) const
 {
     if (m_shader == nullptr)
         return;
 
     m_shader->Use();
 
-    unsigned int transformLoc = glGetUniformLocation(m_shader->m_ID, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(m_transform));
+    glm::mat4 MVP = camera.GetProjectionMatrix() * camera.GetViewMatrix() * m_transform;
+
+    unsigned int mvpLoc = glGetUniformLocation(m_shader->m_ID, "MVP");
+    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);

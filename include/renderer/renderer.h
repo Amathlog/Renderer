@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include "renderer/camera.h"
 
 struct GLFWwindow;
 class Shader;
@@ -30,6 +31,9 @@ public:
     void AddRenderable(const Renderable* renderable);
     void RemoveRenderable(unsigned int id);
 
+    const Camera& GetCamera() const { return m_camera; }
+    Camera& GetCamera() { return m_camera; }
+
 private:
     Renderer() = default;
     static inline Renderer* ms_instance = nullptr;
@@ -38,4 +42,5 @@ private:
 
     using MapToRenderable = std::unordered_map<unsigned int, const Renderable*>;
     MapToRenderable m_mapToRenderable;
+    Camera m_camera;
 };
