@@ -33,6 +33,10 @@ include_directories(external/glfw/include)
 include_directories(external/glad/include)
 include_directories(external/glm)
 
+# Include Box2D
+add_subdirectory(external/box2d)
+include_directories(external/box2d/include)
+
 # Include main project
 file(GLOB RENDERER_SRC
     "include/*.h"
@@ -46,4 +50,4 @@ include_directories("include")
 add_executable(Renderer ${RENDERER_SRC})
 
 # Link the libraries
-target_link_libraries(Renderer ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} glfw)
+target_link_libraries(Renderer ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} glfw Box2D)
