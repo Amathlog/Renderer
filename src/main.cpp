@@ -1,6 +1,6 @@
 #include "renderer/renderer.h"
 #include "renderable/triangle.h"
-#include "renderable/polygon.h"
+#include "renderable/car.h"
 #include <vector>
 #include <chrono> 
 #include <cmath>
@@ -16,58 +16,6 @@
 #define FPS 60
 
 // #define PROFILING
-
-constexpr float LAYER_CAR_Z = 0.5f;
-constexpr float SCALE_CAR = 0.02f;
-
-constexpr std::initializer_list<float> car_vertrices = {
-    // HULL_1
-    60.0f, 130.0f, LAYER_CAR_Z,
-    -60.0f, 130.0f, LAYER_CAR_Z,
-    60.0f, 110.0f, LAYER_CAR_Z,
-    -60.0f, 110.0f, LAYER_CAR_Z,
-    // HULL_2
-    -15.0f, 120.0f, LAYER_CAR_Z,
-    15.0f, 120.0f, LAYER_CAR_Z,
-    20.0f, 20.0f, LAYER_CAR_Z,
-    -20.0f, 20.0f, LAYER_CAR_Z,
-    // HULL_3
-    25.0f, 20.0f, LAYER_CAR_Z,
-    50.0f, -10.0f, LAYER_CAR_Z,
-    50.0f, -40.0f, LAYER_CAR_Z,
-    20.0f, -90.0f, LAYER_CAR_Z,
-    -20.0f, -90.0f, LAYER_CAR_Z,
-    -50.0f, -40.0f, LAYER_CAR_Z,
-    -50.0f, -10.0f, LAYER_CAR_Z,
-    -25.0f, 20.0f, LAYER_CAR_Z,
-    0.0f, -30.0f, LAYER_CAR_Z, // Center
-    // HULL_4
-    -50.0f,-120.0f, LAYER_CAR_Z,
-    50.0f, -120.0f, LAYER_CAR_Z,
-    50.0f, -90.0f, LAYER_CAR_Z,
-    -50.0f, -90.0f, LAYER_CAR_Z
-};
-
-constexpr std::initializer_list<unsigned int> car_indexes = {
-    // HULL_1
-    0, 1, 2,
-    1, 2, 3,
-    // HULL_2
-    4, 5, 6,
-    6, 7, 4,
-    // HULL_3
-    8, 9, 16,
-    9, 10, 16,
-    10, 11, 16,
-    11, 12, 16,
-    12, 13, 16,
-    13, 14, 16,
-    14, 15, 16,
-    15, 8, 16,
-    // HULL_4
-    17, 18, 19,
-    19, 20, 17
-};
 
 int main()
 {
@@ -86,23 +34,22 @@ int main()
     params = {-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f};
 
     // Create a triangle and add it to the renderer
-    // std::vector<float> vertices = {
-    //     // positions 
-    //     0.5f, -0.5f, 0.5f,
-    //     -0.5f, -0.5f, 0.5f,
-    //     0.0f,  0.5f, 0.5f,
-    // };
-    // std::vector<unsigned int> indexes = {
-    //     0, 1, 2
-    // };
-    // Polygon triangle(vertices, indexes, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    std::vector<float> vertrices = {
+        // positions 
+        0.5f, -0.5f, 0.4f,
+        -0.5f, -0.5f, 0.4f,
+        0.0f,  0.5f, 0.4f,
+    };
+    std::vector<unsigned int> indexes = {
+        0, 1, 2
+    };
+    Polygon triangle(vertrices, indexes, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     // renderer->AddRenderable(&triangle);
 
     // Create Car
-    std::vector<float> vertrices = car_vertrices;
-    std::vector<unsigned int> indexes = car_indexes;
-    Polygon car(vertrices, indexes, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    Car car(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
     renderer->AddRenderable(&car);
+    car.AddChild(&triangle);
 
     int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / FPS));
 
@@ -115,9 +62,14 @@ int main()
     {
         auto lastTickTime = std::chrono::high_resolution_clock::now();
 
+        float time = (float)glfwGetTime();
+
         // Update the physics
-        // triangle.SetTransform( glm::rotate((float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f)));
-        car.SetTransform(glm::scale(glm::vec3(SCALE_CAR, SCALE_CAR, 1.0f)));
+        triangle.GetScale() = glm::vec3(50.0f, 50.0f, 1.0f);
+        // triangle.GetPosition()[2] = 0.4f;
+        triangle.GetRotation() = glm::vec3(0.0f, 0.0f, time);
+        car.GetPosition()[0] = 100.0f * cos(time);
+        car.GetScale() = glm::vec3(0.02, 0.02, 1.0f);
 
         // Do the rendering/input processing
         renderer->ProcessInput();

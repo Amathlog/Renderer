@@ -8,12 +8,13 @@ public:
     virtual ~Polygon();
 
     virtual void CreateShader() override;
-    virtual void Draw(const glm::mat4& camera) const override;
 
     glm::vec4& GetColor() {return m_color;}
     const glm::vec4& GetColor() const {return m_color;}
 
 protected:
+    virtual void InternalDraw(const glm::mat4& mvp) const override;
+    
     unsigned int m_VBO;
     unsigned int m_VAO;
     unsigned int m_EBO;

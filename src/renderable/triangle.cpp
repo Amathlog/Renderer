@@ -51,16 +51,14 @@ void Triangle::CreateShader()
     //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\shader.fs");
 }
 
-void Triangle::Draw(const glm::mat4& mvp) const
+void Triangle::InternalDraw(const glm::mat4& mvp) const
 {
     if (m_shader == nullptr)
         return;
 
     m_shader->Use();
 
-    glm::mat4 new_MVP = mvp * m_transform;
-
-    m_shader->SetMat4("MVP", new_MVP);
+    m_shader->SetMat4("MVP", mvp);
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);

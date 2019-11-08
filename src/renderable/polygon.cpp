@@ -54,16 +54,14 @@ void Polygon::CreateShader()
     //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\polygon_shader.fs");
 }
 
-void Polygon::Draw(const glm::mat4& mvp) const
+void Polygon::InternalDraw(const glm::mat4& mvp) const
 {
     if (m_shader == nullptr)
         return;
-
+    
     m_shader->Use();
 
-    glm::mat4 new_MVP = mvp * m_transform;
-
-    m_shader->SetMat4("MVP", new_MVP);
+    m_shader->SetMat4("MVP", mvp);
     m_shader->SetVec4("ourColor", m_color);
 
     glBindVertexArray(m_VAO);
