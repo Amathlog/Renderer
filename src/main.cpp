@@ -33,7 +33,7 @@ int main()
     camera.SetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
     camera.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::OrthographicParams& params = camera.GetOrthographicParams();
-    params = {-300.0f, 300.0f, -300.0f, 300.0f, 0.1f, 100.0f};
+    params = {-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 10.0f};
 
     int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / FPS));
 
@@ -54,6 +54,7 @@ int main()
         float time = (float)glfwGetTime();
 
         // Update the physics
+        gameManager.Step(1.0f / FPS);
 
         // Do the rendering/input processing
         renderer->ProcessInput();

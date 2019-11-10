@@ -14,12 +14,18 @@ public:
 
     void Initialize();
 
+    void Step(float dt) {
+        UpdateCamera();
+    };
+
     void Reset();
     void ClearCars();
 
     void SetNumberOfPlayers(unsigned int numberOfPlayers) {m_numberOfPlayers = numberOfPlayers;}
 
 private:
+    void UpdateCamera();
+
     b2World* m_world = nullptr;
     Track m_track;
     std::vector<Car*> m_cars;

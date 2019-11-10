@@ -4,6 +4,9 @@
 #include "Box2D/Box2D.h"
 #include "racingGame/car.h"
 
+#include "renderer/renderer.h"
+#include "renderer/camera.h"
+
 GameManager::~GameManager()
 {
     ClearCars();
@@ -45,4 +48,22 @@ void GameManager::Reset()
         car->SetIntialState(m_track.GetPath()[0], m_track.GetIntialAngle());
         m_cars.push_back(car);
     }
+}
+
+void GameManager::UpdateCamera()
+{
+    if (m_cars.empty())
+        return;
+    Camera& camera = Renderer::GetInstance()->GetCamera();
+
+    // Set the rotation with the up vector
+    float angle = m_cars[0]->GetAngle();
+    glm::vec3 up(glm::vec3(-std::sin(angle), std::cos(angle), 0.0f));
+    camera.SetUp(up);
+
+    // Snap the camera to the car, minus an offset, to see more of the road
+    glm::vec3 pos = m_cars[0]->GetPosition();
+    pos[2] = camera.GetPosition()[2];
+    pos += up * 10.0f;
+    camera.SetPosition(pos);
 }

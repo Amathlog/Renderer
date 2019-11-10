@@ -72,3 +72,16 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
     m_hullPolygon->GetPosition() = glm::vec3(pos[0] / Constants::SCALE_CAR, pos[1] / Constants::SCALE_CAR, m_hullPolygon->GetPosition()[2]);
     m_hullPolygon->GetRotation()[2] = angle;
 }
+
+glm::vec3 Car::GetPosition()
+{
+    if (m_hullPolygon == nullptr)
+        return glm::vec3(0.0f);
+    return m_hullPolygon->GetPosition() * m_hullPolygon->GetScale();
+}
+
+float Car::GetAngle(){
+    if (m_hullPolygon == nullptr)
+        return 0.0f;
+    return m_hullPolygon->GetRotation()[2];
+}

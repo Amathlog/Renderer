@@ -22,6 +22,8 @@ public:
     void Steer(float steer);
 
     void SetIntialState(const glm::vec2& pos, float angle);
+    glm::vec3 GetPosition();
+    float GetAngle();
 private:
     void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
     // Physics part

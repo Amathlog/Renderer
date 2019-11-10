@@ -21,6 +21,7 @@ public:
     void Close();
 
     void Render();
+    void UpdateCamera();
     void ProcessInput();
 
     GLFWwindow* GetWindow() {return m_window;}

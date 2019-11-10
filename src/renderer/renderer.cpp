@@ -131,5 +131,7 @@ void Renderer::AddRenderable(const Renderable* renderable)
 
 void Renderer::RemoveRenderable(unsigned int id)
 {
-    m_mapToRenderable.erase(id);
+    MapToRenderable::iterator it = m_mapToRenderable.find(id);
+    if (it != m_mapToRenderable.end())
+        m_mapToRenderable.erase(it);
 }
