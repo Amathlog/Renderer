@@ -1,6 +1,7 @@
 #include "renderer/renderer.h"
 #include "renderable/triangle.h"
 #include "renderable/car.h"
+#include "racingGame/track.h"
 #include <vector>
 #include <chrono> 
 #include <cmath>
@@ -8,6 +9,7 @@
 
 #include "glm.hpp"
 #include "gtx/transform.hpp"
+
 
 #include "GLFW/glfw3.h"
 
@@ -31,7 +33,7 @@ int main()
     camera.SetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
     camera.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::OrthographicParams& params = camera.GetOrthographicParams();
-    params = {-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f};
+    params = {-300.0f, 300.0f, -300.0f, 300.0f, 0.1f, 100.0f};
 
     // Create a triangle and add it to the renderer
     std::vector<float> vertrices = {
@@ -43,13 +45,22 @@ int main()
     std::vector<unsigned int> indexes = {
         0, 1, 2
     };
-    Polygon triangle(vertrices, indexes, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    // renderer->AddRenderable(&triangle);
+    // Polygon triangle(vertrices, indexes, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    // // renderer->AddRenderable(&triangle);
 
-    // Create Car
-    Car car(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    renderer->AddRenderable(&car);
-    car.AddChild(&triangle);
+    // // Create Car
+    // Car car(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    // renderer->AddRenderable(&car);
+    // car.AddChild(&triangle);
+
+    Track track;
+    while(1)
+    {
+        if (track.GenerateTrack())
+            break;
+        std::cout << "Failed to generate track, try again..." << std::endl;
+        // return -1;
+    }
 
     int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / FPS));
 
@@ -65,11 +76,11 @@ int main()
         float time = (float)glfwGetTime();
 
         // Update the physics
-        triangle.GetScale() = glm::vec3(50.0f, 50.0f, 1.0f);
-        // triangle.GetPosition()[2] = 0.4f;
-        triangle.GetRotation() = glm::vec3(0.0f, 0.0f, time);
-        car.GetPosition()[0] = 100.0f * cos(time);
-        car.GetScale() = glm::vec3(0.02, 0.02, 1.0f);
+        // triangle.GetScale() = glm::vec3(50.0f, 50.0f, 1.0f);
+        // // triangle.GetPosition()[2] = 0.4f;
+        // triangle.GetRotation() = glm::vec3(0.0f, 0.0f, time);
+        // car.GetPosition()[0] = 100.0f * cos(time);
+        // car.GetScale() = glm::vec3(0.02, 0.02, 1.0f);
 
         // Do the rendering/input processing
         renderer->ProcessInput();

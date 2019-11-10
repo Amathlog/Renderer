@@ -35,7 +35,7 @@ include_directories(external/glm)
 
 # Include Box2D
 add_subdirectory(external/box2d)
-include_directories(external/box2d/include)
+include_directories(external/box2d)
 
 # Include main project
 file(GLOB RENDERER_SRC

@@ -92,7 +92,7 @@ void Renderer::ProcessInput()
     if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window, true);
 
-    constexpr float factor = 0.05f;
+    constexpr float factor = 2.0f;
 
     if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
     {
@@ -110,6 +110,34 @@ void Renderer::ProcessInput()
         params.right += factor;
         params.bottom -= factor;
         params.top += factor;
+    }
+
+    if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.left -= factor;
+        params.right -= factor;
+    }
+
+    if(glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.left += factor;
+        params.right += factor;
+    }
+
+    if(glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.top += factor;
+        params.bottom += factor;
+    }
+
+    if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
+        params.top -= factor;
+        params.bottom -= factor;
     }
 }
 
