@@ -31,3 +31,12 @@ void Camera::SetUp(const glm::vec3& up)
 {
     m_up = glm::normalize(up);
 }
+
+// Only available in Orthographic view
+void Camera::Zoom(float factor)
+{
+    m_orthgraphicParams.top -= factor;
+    m_orthgraphicParams.bottom += factor;
+    m_orthgraphicParams.left += factor;
+    m_orthgraphicParams.right -= factor;
+}

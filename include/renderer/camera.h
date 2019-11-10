@@ -30,6 +30,10 @@ public:
     glm::mat4 GetProjectionMatrix() const;
     glm::mat4 GetViewMatrix() const;
 
+    const glm::vec3& GetPosition() const {return m_position;}
+    const glm::vec3& GetDirection() const {return m_direction;}
+    const glm::vec3& GetUp() const {return m_up;}
+
     void SetPosition(const glm::vec3& pos) {m_position = pos;}
     void SetDirection(const glm::vec3& dir);
     void SetUp(const glm::vec3& up);
@@ -42,6 +46,9 @@ public:
 
     void SetIsPespective() {m_isPerspective = true;}
     void SetIsOrthographic() {m_isPerspective = false;}
+
+    // Only available in Orthographic view
+    void Zoom(float factor);
 
 private:
     OrthographicParams m_orthgraphicParams;

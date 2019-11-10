@@ -95,50 +95,23 @@ void Renderer::ProcessInput()
     constexpr float factor = 2.0f;
 
     if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.left += factor;
-        params.right -= factor;
-        params.bottom += factor;
-        params.top -= factor;
-    }
+        m_camera.Zoom(factor);
 
     if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.left -= factor;
-        params.right += factor;
-        params.bottom -= factor;
-        params.top += factor;
-    }
+        m_camera.Zoom(-factor);
 
     if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.left -= factor;
-        params.right -= factor;
-    }
+        m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(factor, 0.0f, 0.0f));
 
     if(glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.left += factor;
-        params.right += factor;
-    }
+        m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(-factor, 0.0f, 0.0f));
 
     if(glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.top += factor;
-        params.bottom += factor;
-    }
+        m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, factor, 0.0f));
 
     if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        Camera::OrthographicParams& params = m_camera.GetOrthographicParams();
-        params.top -= factor;
-        params.bottom -= factor;
-    }
+        m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, -factor, 0.0f));
+
 }
 
 bool Renderer::RequestedClose()
