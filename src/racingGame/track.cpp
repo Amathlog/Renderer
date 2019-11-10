@@ -226,6 +226,7 @@ bool Track::GenerateTrack()
             renderer->AddRenderable(newBorder);
         }
     }
+    m_initialAngle = track[0][1];
     return true;
 }
 
@@ -247,4 +248,5 @@ void Track::ClearTrack()
     }
     m_bordersPolygon.clear();
     m_path.clear();
+    m_initialAngle = 0.0f;
 }

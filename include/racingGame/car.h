@@ -1,10 +1,15 @@
 #pragma once
 
-#include "renderable/polygon.h"
-#include "Box2D/Box2D.h"
+#include "glm.hpp"
+#include <vector>
+
+class b2Body;
+class b2World;
+class Polygon;
 
 class Car
 {
+public:
     Car(b2World* world, const glm::vec4& color);
     ~Car();
 
@@ -15,6 +20,8 @@ class Car
     void Gas(float gas);
     void Brake(float brake);
     void Steer(float steer);
+
+    void SetIntialState(const glm::vec2& pos, float angle);
 private:
     void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
     // Physics part
@@ -24,6 +31,6 @@ private:
     // Rendering part
     glm::vec4 m_hullColor;
     Polygon* m_hullPolygon;
-    Polygon* m_wheelsPolygon[4];
-    Polygon* m_particlesPolygon[10];
+    std::vector<Polygon*> m_wheelsPolygon;
+    std::vector<Polygon*> m_particlesPolygon;
 };

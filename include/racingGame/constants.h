@@ -63,9 +63,9 @@ namespace Constants
     constexpr float WHEEL_W = 14.0f;
     constexpr float SCALE_CAR = 0.02f;
 
-    constexpr std::initializer_list<float> WHEEL_COLOR = {0.0f,0.0f,0.0f};
-    constexpr std::initializer_list<float> WHEEL_WHITE = {0.3f,0.3f,0.3f};
-    constexpr std::initializer_list<float> MUD_COLOR = {0.4f,0.4f,0.0f};
+    constexpr float WHEEL_COLOR[] = {0.0f,0.0f,0.0f};
+    constexpr float WHEEL_WHITE[] = {0.3f,0.3f,0.3f};
+    constexpr float MUD_COLOR[] = {0.4f,0.4f,0.0f};
 
     constexpr float ENGINE_POWER = 100000000.0f * SCALE_CAR * SCALE_CAR;
     constexpr float WHEEL_MOMENT_OF_INERTIA = 4000.0f * SCALE_CAR * SCALE_CAR;
