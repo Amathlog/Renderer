@@ -53,6 +53,14 @@ int main()
 
         float time = (float)glfwGetTime();
 
+        // static bool test = false;
+        // if (time > 2.0f && !test)
+        // {
+        //     test = true;
+        //     std::cout << "Test" << std::endl;
+        //     gameManager.Reset();
+        // }
+
         // Update the physics
         gameManager.Step(1.0f / FPS);
 

@@ -94,11 +94,16 @@ void Renderer::ProcessInput()
 
     constexpr float factor = 2.0f;
 
-    if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-        m_camera.Zoom(factor);
+    // if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
+    //     m_camera.Zoom(factor);
 
-    if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        m_camera.Zoom(-factor);
+    // if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    //     m_camera.Zoom(-factor);
+
+    upPressed = glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS;
+    downPressed = glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS;
+    leftPressed = glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS;
+    rightPressed = glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(factor, 0.0f, 0.0f));

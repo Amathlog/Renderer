@@ -14,9 +14,7 @@ public:
 
     void Initialize();
 
-    void Step(float dt) {
-        UpdateCamera();
-    };
+    void Step(float dt);
 
     void Reset();
     void ClearCars();

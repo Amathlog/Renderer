@@ -35,6 +35,11 @@ public:
     const Camera& GetCamera() const { return m_camera; }
     Camera& GetCamera() { return m_camera; }
 
+    bool upPressed = false;
+    bool downPressed = false;
+    bool leftPressed = false;
+    bool rightPressed = false;
+
 private:
     Renderer() = default;
     static inline Renderer* ms_instance = nullptr;

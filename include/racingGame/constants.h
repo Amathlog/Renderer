@@ -9,13 +9,14 @@ namespace Constants
     constexpr float LAYER_PARTICLES = 0.6f;
     constexpr float LAYER_CAR_Z = 0.5f;
     constexpr float LAYER_WHEELS = 0.4f;
+    constexpr float SCALE_CAR = 0.02f;
 
     constexpr std::initializer_list<float> HULL_VERTRICES = {
         // HULL_1
         60.0f, 130.0f, LAYER_CAR_Z,
         -60.0f, 130.0f, LAYER_CAR_Z,
-        60.0f, 110.0f, LAYER_CAR_Z,
         -60.0f, 110.0f, LAYER_CAR_Z,
+        60.0f, 110.0f, LAYER_CAR_Z,
         // HULL_2
         -15.0f, 120.0f, LAYER_CAR_Z,
         15.0f, 120.0f, LAYER_CAR_Z,
@@ -41,10 +42,10 @@ namespace Constants
     constexpr std::initializer_list<unsigned int> HULL_INDEXES = {
         // HULL_1
         0, 1, 2,
-        1, 2, 3,
+        0, 2, 3,
         // HULL_2
         4, 5, 6,
-        6, 7, 4,
+        4, 6, 7,
         // HULL_3
         8, 9, 16,
         9, 10, 16,
@@ -61,7 +62,13 @@ namespace Constants
 
     constexpr float WHEEL_R = 27.0f;
     constexpr float WHEEL_W = 14.0f;
-    constexpr float SCALE_CAR = 0.02f;
+
+    constexpr std::initializer_list<float> WHEEL_VERTRICES = {
+        WHEEL_W, WHEEL_R, LAYER_WHEELS,
+        -WHEEL_W, WHEEL_R, LAYER_WHEELS,
+        -WHEEL_W, -WHEEL_R, LAYER_WHEELS,
+        WHEEL_W, -WHEEL_R, LAYER_WHEELS,
+    };
 
     constexpr float WHEEL_COLOR[] = {0.0f,0.0f,0.0f};
     constexpr float WHEEL_WHITE[] = {0.3f,0.3f,0.3f};
@@ -70,10 +77,11 @@ namespace Constants
     constexpr float ENGINE_POWER = 100000000.0f * SCALE_CAR * SCALE_CAR;
     constexpr float WHEEL_MOMENT_OF_INERTIA = 4000.0f * SCALE_CAR * SCALE_CAR;
     constexpr float FRICTION_LIMIT = 1000000.0f * SCALE_CAR * SCALE_CAR;     // friction ~= mass ~= size^2 (calculated implicitly using density)
+    constexpr float BRAKE_FORCE = 15.0f;  // Rad/s
 
     constexpr float WHEELPOS[] = {
-        -55.0f, 80.0f, 
         55.0f, 80.0f,
+        -55.0f, 80.0f, 
         -55.0f,-82.0f,
         55.0f,-82.0f
     };

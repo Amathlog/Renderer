@@ -67,3 +67,27 @@ void GameManager::UpdateCamera()
     pos += up * 10.0f;
     camera.SetPosition(pos);
 }
+
+void GameManager::Step(float dt) 
+{
+    static float t = 0.0F;
+    t += dt;
+    Renderer* renderer = Renderer::GetInstance();
+    for (auto car : m_cars)
+    {
+        car->Gas(renderer->upPressed ? 1.0f : 0.0f);
+        if (renderer->leftPressed)
+            car->Steer(-1.0f);
+        else if (renderer->rightPressed)
+            car->Steer(1.0f);
+        else 
+            car->Steer(0.0f);
+        car->Brake(renderer->downPressed ? 0.8f : 0.0f);
+        car->Step(dt);
+        car->UpdateRendering();
+    }
+
+    m_world->Step(dt, 6*30, 2*30);
+
+    UpdateCamera();
+};
