@@ -2,6 +2,7 @@
 
 #include "glm.hpp"
 #include <vector>
+#include <list>
 
 class b2Body;
 class b2World;
@@ -51,5 +52,5 @@ private:
     glm::vec4 m_hullColor;
     Polygon* m_hullPolygon;
     std::vector<Polygon*> m_wheelsPolygon;
-    std::vector<Polygon*> m_particlesPolygon;
+    std::list<Polygon*> m_particlesPolygon;
 };

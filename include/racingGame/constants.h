@@ -98,4 +98,6 @@ namespace Constants
     constexpr unsigned int BORDER_MIN_COUNT = 6;
 
     constexpr float ROAD_COLOR[] = {0.4, 0.4, 0.4};
+    constexpr float BACKGROUND_COLOR1[] = {0.4, 0.8, 0.4};
+    constexpr float BACKGROUND_COLOR2[] = {0.4, 0.9, 0.4};
 };

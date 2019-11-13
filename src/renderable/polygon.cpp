@@ -1,6 +1,7 @@
 #include "renderable/polygon.h"
 #include "renderer/camera.h"
 #include "shaders/shaders.h"
+#include "shaders/shaderManager.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,6 +10,7 @@
 #include <gtx/string_cast.hpp> 
 
 #include <iostream>
+#include <filesystem>
 
 Polygon::Polygon(const std::vector<float>& vertrices, const std::vector<unsigned int>& indexes, const glm::vec4& color)
     : Renderable()
@@ -48,10 +50,11 @@ Polygon::~Polygon()
 
 void Polygon::CreateShader()
 {
-    m_shader = new Shader("/home/adrien/Programming/Renderer/shaders/polygon_shader.vs",
-                         "/home/adrien/Programming/Renderer/shaders/polygon_shader.fs");
-    // m_shader = new Shader("C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\polygon_shader.vs",
-    //     "C:\\Users\\adrie\\Documents\\Programming\\Renderer\\shaders\\polygon_shader.fs");
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    m_shader = ShaderManager::GetInstance()->LoadShader(
+        (std::filesystem::current_path() / ".." / "shaders" / "polygon_shader.vs").c_str(),
+        (std::filesystem::current_path() / ".." / "shaders" / "polygon_shader.fs").c_str()
+    );
 }
 
 void Polygon::InternalDraw(const glm::mat4& mvp) const
@@ -67,4 +70,6 @@ void Polygon::InternalDraw(const glm::mat4& mvp) const
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, m_nbVertrices, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+    m_shader->Disable();
 }

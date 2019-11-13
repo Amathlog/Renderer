@@ -44,7 +44,8 @@ int main()
 
 #ifdef PROFILING
     int64_t count = 0;
-    int64_t sumTime = 0;
+    int64_t sumTimeRendering = 0;
+    int64_t sumTimePhysics = 0;
 #endif // PROFILING
 
     while(!renderer->RequestedClose())
@@ -62,7 +63,16 @@ int main()
         // }
 
         // Update the physics
+#ifdef PROFILING
+        auto tickTimePhysics = std::chrono::high_resolution_clock::now();
+#endif // PROFILING
+
         gameManager.Step(1.0f / FPS);
+
+#ifdef PROFILING
+        auto differencePhysics = std::chrono::high_resolution_clock::now() - tickTimePhysics;
+        sumTimePhysics += std::chrono::duration_cast<std::chrono::microseconds>(differencePhysics).count();
+#endif // PROFILING
 
         // Do the rendering/input processing
         renderer->ProcessInput();
@@ -73,12 +83,14 @@ int main()
         auto difference = currentTime - lastTickTime;
         auto renderTime = std::chrono::duration_cast<std::chrono::microseconds>(difference).count();
 #ifdef PROFILING
-        sumTime += renderTime;
+        sumTimeRendering += renderTime;
         if(++count == 60)
         {
-            std::cout << "Mean render time: " << sumTime / 60 << "us" << std::endl;
+            std::cout << "Mean render time: " << sumTimeRendering / 60 << "us" << std::endl;
+            std::cout << "Mean physics time: " << sumTimePhysics / 60 << "us" << std::endl;
             count = 0;
-            sumTime = 0;
+            sumTimePhysics = 0;
+            sumTimeRendering = 0;
         }
 #endif // PROFILING
         if (renderTime < deltaTimeUS)

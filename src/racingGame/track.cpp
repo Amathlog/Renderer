@@ -250,3 +250,61 @@ void Track::ClearTrack()
     m_path.clear();
     m_initialAngle = 0.0f;
 }
+
+Track::Track()
+{
+    Renderer* renderer = Renderer::GetInstance();
+
+    // Generate the background
+    std::vector<float> backgroundVertrices = {
+        -Constants::PLAYFIELD, Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
+        Constants::PLAYFIELD, Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
+        Constants::PLAYFIELD, -Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
+        -Constants::PLAYFIELD, -Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z
+    };
+
+    std::vector<unsigned int> backgroundIndexes = {0, 1, 2, 0, 2, 3};
+    glm::vec4 color(Constants::BACKGROUND_COLOR1[0], Constants::BACKGROUND_COLOR1[1], Constants::BACKGROUND_COLOR1[2], 1.0f);
+    Polygon* background = new Polygon(backgroundVertrices, backgroundIndexes, color);
+    renderer->AddRenderable(background);
+    m_backgroundSquares.push_back(background);
+
+    // Then add the little squares
+    int nbSquares = 20;
+    float k = Constants::PLAYFIELD / nbSquares;
+    std::vector<float> squareVertrices;
+    std::vector<unsigned int> squareIndexes;
+    unsigned int currentIndex = 0;
+    for (int i = -nbSquares; i < nbSquares; i += 2)
+    {
+        for (int j = -nbSquares; j < nbSquares; j+= 2)
+        {
+                squareVertrices.insert(squareVertrices.end(), {
+                    k * i, k * (j + 1), Constants::LAYER_BACKGROUND_Z - 0.01f,
+                    k * (i + 1), k * (j + 1), Constants::LAYER_BACKGROUND_Z - 0.01f,
+                    k * (i + 1), k * j, Constants::LAYER_BACKGROUND_Z - 0.01f,
+                    k * i, k * j, Constants::LAYER_BACKGROUND_Z - 0.01f
+                });
+
+                squareIndexes.insert(squareIndexes.end(), 
+                {currentIndex, currentIndex + 1, currentIndex + 2,
+                 currentIndex, currentIndex + 2, currentIndex + 3});
+                currentIndex += 4;
+        }
+    }
+    glm::vec4 colorSquare(Constants::BACKGROUND_COLOR2[0], Constants::BACKGROUND_COLOR2[1], Constants::BACKGROUND_COLOR2[2], 1.0f);
+    Polygon* square = new Polygon(squareVertrices, squareIndexes, colorSquare);
+    renderer->AddRenderable(square);
+    m_backgroundSquares.push_back(square);
+}
+
+void Track::ClearBackground()
+{
+    Renderer* renderer = Renderer::GetInstance();
+    for (Polygon* square : m_backgroundSquares)
+    {
+        renderer->RemoveRenderable(square->GetId());
+        delete square;
+    }
+    m_backgroundSquares.clear();
+}
