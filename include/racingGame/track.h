@@ -25,7 +25,7 @@ public:
     float GetIntialAngle() {return m_initialAngle;}
 private:
     std::vector<Polygon*> m_backgroundSquares;
-    std::vector<Polygon*> m_tilesPolygon;
+    Polygon* m_tilesPolygon = nullptr;
     std::vector<Polygon*> m_bordersPolygon;
     std::vector<glm::vec2> m_path;
     float m_initialAngle = 0.0f;

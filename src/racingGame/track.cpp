@@ -4,11 +4,13 @@
 #include "racingGame/constants.h"
 #include "renderable/polygon.h"
 #include "renderer/renderer.h"
+#include "shaders/shaderManager.h"
 
 #include <cmath>
 #include <random>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 
 #include <gtx/string_cast.hpp> 
 
@@ -171,16 +173,24 @@ bool Track::GenerateTrack()
     };
     glm::vec4 roadColor(Constants::ROAD_COLOR[0], Constants::ROAD_COLOR[1], Constants::ROAD_COLOR[2], 1.0f);
     Renderer* renderer = Renderer::GetInstance();
+    // Road data
+    std::vector<float> roadVertrices;
+    std::vector<unsigned int> roadIndexes;
+    // Border data
+    std::vector<float> whiteBorderVertrices;
+    std::vector<unsigned int> whiteBorderIndexes;
+    std::vector<float> redBorderVertrices;
+    std::vector<unsigned int> redBorderIndexes;
     // Generate our polygons
     for(unsigned int i = 0; i < track.size(); ++i)
     {
         const glm::vec4 p1 = track[i];
-        const glm::vec4 p2 = track[(i+1) % track.size()];
+        const glm::vec4 p2 = track[(i + 1) % track.size()];
 
         // Add to the path
         m_path.push_back(glm::vec2(p1[2], p1[3]));
 
-        std::vector<float> vertrices = {
+        roadVertrices.insert(roadVertrices.end(), {
             p1[2] - Constants::TRACK_WIDTH * std::cos(p1[1]),
             p1[3] - Constants::TRACK_WIDTH * std::sin(p1[1]),
             Constants::LAYER_TRACK_Z,
@@ -192,18 +202,28 @@ bool Track::GenerateTrack()
             p2[2] - Constants::TRACK_WIDTH * std::cos(p2[1]),
             p2[3] - Constants::TRACK_WIDTH * std::sin(p2[1]),
             Constants::LAYER_TRACK_Z,
-            
+
             p2[2] + Constants::TRACK_WIDTH * std::cos(p2[1]),
             p2[3] + Constants::TRACK_WIDTH * std::sin(p2[1]),
             Constants::LAYER_TRACK_Z
-        };
-        Polygon* newTile = new Polygon(vertrices, indexes, roadColor + 0.01f * glm::vec4(i%3, i%3, i%3, 0.0f));
-        m_tilesPolygon.push_back(newTile);
-        renderer->AddRenderable(newTile);
+        });
+
+        unsigned int index = 4 * i;
+        roadIndexes.insert(roadIndexes.end(), 
+            {
+                index, index + 1, index + 2,
+                index + 1, index + 2, index + 3
+            }
+        );
+
         if (borders[i])
         {
             float side = std::signbit(p1[1] - p2[1]) ? -1 : 1;
-            std::vector<float> vertrices_borders = {
+            std::vector<float>& vertricesToFill = i % 2 == 0 ? whiteBorderVertrices : redBorderVertrices;
+            std::vector<unsigned int>& indexesToFill = i % 2 == 0 ? whiteBorderIndexes : redBorderIndexes;
+
+            vertricesToFill.insert(vertricesToFill.end(),
+                {
                 p1[2] + side * Constants::TRACK_WIDTH * std::cos(p1[1]),
                 p1[3] + side * Constants::TRACK_WIDTH * std::sin(p1[1]),
                 Constants::LAYER_TRACK_Z,
@@ -219,13 +239,35 @@ bool Track::GenerateTrack()
                 p2[2] + side * (Constants::TRACK_WIDTH + Constants::BORDER) * std::cos(p2[1]),
                 p2[3] + side * (Constants::TRACK_WIDTH + Constants::BORDER) * std::sin(p2[1]),
                 Constants::LAYER_TRACK_Z
-            };
-            glm::vec4 borderColor = i % 2 == 0 ? glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) : glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            Polygon* newBorder = new Polygon(vertrices_borders, indexes, borderColor);
-            m_bordersPolygon.push_back(newBorder);
-            renderer->AddRenderable(newBorder);
+                }
+            );
+
+            unsigned int index = vertricesToFill.size() / 3 - 4;
+            indexesToFill.insert(indexesToFill.end(),
+                {
+                    index, index + 1, index + 2,
+                    index + 1, index + 2, index + 3
+                }
+            );
         }
     }
+
+    // Then create the polygons. For the track, use a specific shader
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    Shader* trackShader = ShaderManager::GetInstance()->LoadShader(
+        (std::filesystem::current_path() / ".." / "shaders" / "track_shader.vs").c_str(),
+        (std::filesystem::current_path() / ".." / "shaders" / "track_shader.fs").c_str()
+    );
+
+    m_tilesPolygon = new Polygon(roadVertrices, roadIndexes, roadColor, trackShader);
+    renderer->AddRenderable(m_tilesPolygon);
+
+    m_bordersPolygon.push_back(new Polygon(whiteBorderVertrices, whiteBorderIndexes, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    m_bordersPolygon.push_back(new Polygon(redBorderVertrices, redBorderIndexes, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+
+    renderer->AddRenderable(m_bordersPolygon[0]);
+    renderer->AddRenderable(m_bordersPolygon[1]);
+
     m_initialAngle = track[0][1];
     return true;
 }
@@ -234,12 +276,12 @@ void Track::ClearTrack()
 {
     Renderer* renderer = Renderer::GetInstance();
 
-    for (unsigned int i = 0; i < m_tilesPolygon.size(); ++i)
+    if (m_tilesPolygon != nullptr)
     {
-        renderer->RemoveRenderable(m_tilesPolygon[i]->GetId());
-        delete m_tilesPolygon[i];
+        renderer->RemoveRenderable(m_tilesPolygon->GetId());
+        delete m_tilesPolygon;
+        m_tilesPolygon = nullptr;
     }
-    m_tilesPolygon.clear();
 
     for (unsigned int i = 0; i < m_bordersPolygon.size(); ++i)
     {

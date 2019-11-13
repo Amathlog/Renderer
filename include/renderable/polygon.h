@@ -4,7 +4,11 @@
 class Polygon : public Renderable
 {
 public:
-    Polygon(const std::vector<float>& vertrices, const std::vector<unsigned int>& indexes, const glm::vec4& color);
+    Polygon(const std::vector<float>& vertrices, 
+            const std::vector<unsigned int>& indexes, 
+            const glm::vec4& color,
+            Shader* specificShader = nullptr);
+    
     virtual ~Polygon();
 
     virtual void CreateShader() override;
