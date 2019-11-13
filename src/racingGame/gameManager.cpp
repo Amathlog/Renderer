@@ -6,6 +6,7 @@
 
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
+#include "racingGame/constants.h"
 
 GameManager::~GameManager()
 {
@@ -73,8 +74,17 @@ void GameManager::Step(float dt)
     static float t = 0.0F;
     t += dt;
     Renderer* renderer = Renderer::GetInstance();
+    bool shouldReset = false;
     for (auto car : m_cars)
     {
+        // Check if the car is out
+        const glm::vec3& carPos = car->GetPosition();
+        if (std::abs(carPos[0]) > 0.85f * Constants::PLAYFIELD ||
+            std::abs(carPos[1]) > 0.85f * Constants::PLAYFIELD)
+        {
+            shouldReset = true;
+            break;
+        }
         car->Gas(renderer->upPressed ? 1.0f : 0.0f);
         if (renderer->leftPressed)
             car->Steer(-1.0f);
@@ -90,4 +100,7 @@ void GameManager::Step(float dt)
     m_world->Step(dt, 6*30, 2*30);
 
     UpdateCamera();
+
+    if (shouldReset)
+        Reset();
 };
