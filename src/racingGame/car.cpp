@@ -114,6 +114,9 @@ void Car::InitializePhysics()
 
 void Car::InitializeRendering()
 {
+    if (!Renderer::GetInstance()->IsEnabled())
+        return;
+
     // First the hull
     std::vector<float> vertrices(Constants::HULL_VERTRICES);
     std::vector<unsigned int> indexes(Constants::HULL_INDEXES);
@@ -137,6 +140,7 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
 {
     if (m_hull == nullptr || m_wheels.empty())
         return;
+    
     b2Vec2 box2DPos(pos[0], pos[1]);
     m_hull->SetTransform(box2DPos, angle);
     for (auto& wheel : m_wheels)
@@ -144,8 +148,6 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
         wheel.body->SetTransform(box2DPos + wheel.body->GetPosition(), angle);
     }
     UpdateRendering();
-    // m_hullPolygon->GetPosition() = glm::vec3(pos[0] / Constants::SCALE_CAR, pos[1] / Constants::SCALE_CAR, m_hullPolygon->GetPosition()[2]);
-    // m_hullPolygon->GetRotation()[2] = angle;
 }
 
 glm::vec3 Car::GetPosition()
@@ -154,20 +156,12 @@ glm::vec3 Car::GetPosition()
         return glm::vec3(0.0f);
     b2Vec2 pos = m_hull->GetPosition();
     return glm::vec3(pos.x, pos.y, 0.0f);
-
-    // if (m_hullPolygon == nullptr)
-    //     return glm::vec3(0.0f);
-    // return m_hullPolygon->GetPosition() * m_hullPolygon->GetScale();
 }
 
 float Car::GetAngle(){
     if (m_hull == nullptr)
         return 0.0f;
     return m_hull->GetAngle();
-
-    // if (m_hullPolygon == nullptr)
-    //     return 0.0f;
-    // return m_hullPolygon->GetRotation()[2];
 }
 
 void Car::UpdateRendering()
@@ -241,8 +235,6 @@ void Car::Step(float dt)
 
         float velocityForward = b2Dot(forward, velocity);
         float velocitySide = b2Dot(side, velocity);
-        // vf = forw[0]*v[0] + forw[1]*v[1]  # forward speed
-        // vs = side[0]*v[0] + side[1]*v[1]  # side speed
 
         // WHEEL_MOMENT_OF_INERTIA*np.square(w.omega)/2 = E -- energy
         // WHEEL_MOMENT_OF_INERTIA*w.omega * domega/dt = dE/dt = W -- power

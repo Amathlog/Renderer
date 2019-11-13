@@ -35,7 +35,7 @@ public:
     Renderable* GetChild(unsigned int id);
     void RemoveChild(unsigned int id);
 protected:
-    virtual void InternalDraw(const glm::mat4& mvp) const {};
+    virtual void InternalDraw(const glm::mat4&) const {};
 
     Shader* m_shader = nullptr;
 

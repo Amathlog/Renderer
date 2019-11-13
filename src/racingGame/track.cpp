@@ -166,6 +166,15 @@ bool Track::GenerateTrack()
         }
     }
 
+    // Store the path
+    for (unsigned int idx = 0; idx < track.size(); ++idx)
+        // Add to the path
+        m_path.push_back(glm::vec2(track[idx][2], track[idx][3]));
+
+    // If we have no rendering, stop here
+    if (!Renderer::GetInstance()->IsEnabled())
+        return true;
+
     // Create tiles
     std::vector<unsigned int> indexes = {
         0, 1, 2, 
@@ -186,9 +195,6 @@ bool Track::GenerateTrack()
     {
         const glm::vec4 p1 = track[i];
         const glm::vec4 p2 = track[(i + 1) % track.size()];
-
-        // Add to the path
-        m_path.push_back(glm::vec2(p1[2], p1[3]));
 
         roadVertrices.insert(roadVertrices.end(), {
             p1[2] - Constants::TRACK_WIDTH * std::cos(p1[1]),
@@ -296,6 +302,10 @@ void Track::ClearTrack()
 Track::Track()
 {
     Renderer* renderer = Renderer::GetInstance();
+
+    // If we have no renderer, nothing to do
+    if (!renderer->IsEnabled())
+        return;
 
     // Generate the background
     std::vector<float> backgroundVertrices = {

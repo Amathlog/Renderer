@@ -9,7 +9,7 @@
 #include "renderable/renderable.h"
 
 namespace {
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    void framebuffer_size_callback(GLFWwindow*, int width, int height)
     {
         glViewport(0, 0, width, height);
     } 
@@ -17,6 +17,9 @@ namespace {
 
 int Renderer::Initialize(unsigned int width, unsigned int height)
 {
+    if (!m_enable || m_initialize)
+        return 0;
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -45,6 +48,8 @@ int Renderer::Initialize(unsigned int width, unsigned int height)
 
     glEnable(GL_DEPTH_TEST);
 
+    m_initialize = true;
+
     return 0;
 }
 
@@ -66,7 +71,7 @@ Renderer::~Renderer()
 
 void Renderer::Render()
 {
-    if (m_window == nullptr)
+    if (m_window == nullptr || !m_enable)
         return;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -86,7 +91,7 @@ void Renderer::Render()
 
 void Renderer::ProcessInput()
 {
-    if (m_window == nullptr)
+    if (m_window == nullptr || !m_enable)
         return;
 
     if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -121,7 +126,7 @@ void Renderer::ProcessInput()
 
 bool Renderer::RequestedClose()
 {
-    if (m_window == nullptr)
+    if (m_window == nullptr || !m_enable)
         return true;
     
     return glfwWindowShouldClose(m_window);
@@ -129,13 +134,16 @@ bool Renderer::RequestedClose()
 
 void Renderer::AddRenderable(const Renderable* renderable)
 {
-    if (renderable == nullptr)
+    if (renderable == nullptr || !m_enable)
         return;
     m_mapToRenderable.emplace(renderable->GetId(), renderable);
 }
 
 void Renderer::RemoveRenderable(unsigned int id)
 {
+    if (!m_enable)
+        return;
+    
     MapToRenderable::iterator it = m_mapToRenderable.find(id);
     if (it != m_mapToRenderable.end())
         m_mapToRenderable.erase(it);

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <thread>
 #include <iostream>
+#include <cstring>
 
 #include "glm.hpp"
 #include "gtx/transform.hpp"
@@ -17,11 +18,16 @@
 #define WINDOW_HEIGHT 600
 #define FPS 60
 
-// #define PROFILING
+#define PROFILING
 
-int main()
+int main(int argc, char** argv)
 {
+    bool enableRendering = true;
+    if (argc > 1)
+        enableRendering = strcmp(argv[1], "--no-render") != 0;
+     
     Renderer* renderer = Renderer::GetInstance();
+    renderer->Enable(enableRendering);
     int errorCode = renderer->Initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
     if(errorCode != 0)
         return errorCode;
@@ -48,18 +54,22 @@ int main()
     int64_t sumTimePhysics = 0;
 #endif // PROFILING
 
-    while(!renderer->RequestedClose())
+    auto startingTime = std::chrono::high_resolution_clock::now();
+
+    while(!renderer->IsEnabled() || !renderer->RequestedClose())
     {
         auto lastTickTime = std::chrono::high_resolution_clock::now();
 
-        float time = (float)glfwGetTime();
+        int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(lastTickTime - startingTime).count();
+        time = time + 1 - 1;
 
         // static bool test = false;
-        // if (time > 2.0f && !test)
+        // if (time > 2000 && !test)
         // {
         //     test = true;
         //     std::cout << "Test" << std::endl;
         //     gameManager.Reset();
+        //     break;
         // }
 
         // Update the physics
@@ -74,9 +84,12 @@ int main()
         sumTimePhysics += std::chrono::duration_cast<std::chrono::microseconds>(differencePhysics).count();
 #endif // PROFILING
 
-        // Do the rendering/input processing
-        renderer->ProcessInput();
-        renderer->Render();
+        // Do the rendering/input processing, if necessary
+        if (enableRendering)
+        {
+            renderer->ProcessInput();
+            renderer->Render();
+        }
         
         // Reach FPS target
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -86,17 +99,22 @@ int main()
         sumTimeRendering += renderTime;
         if(++count == 60)
         {
-            std::cout << "Mean render time: " << sumTimeRendering / 60 << "us" << std::endl;
+            if (enableRendering)
+                std::cout << "Mean render time: " << sumTimeRendering / 60 << "us" << std::endl;
             std::cout << "Mean physics time: " << sumTimePhysics / 60 << "us" << std::endl;
             count = 0;
             sumTimePhysics = 0;
             sumTimeRendering = 0;
         }
 #endif // PROFILING
-        if (renderTime < deltaTimeUS)
-            std::this_thread::sleep_for(std::chrono::microseconds(deltaTimeUS - renderTime));
-        else
-            std::cout << "This frame took too much time... " << renderTime << "us" << std::endl; 
+        // Do not wait if we don't render
+        if (enableRendering)
+        {
+            if (renderTime < deltaTimeUS)
+                std::this_thread::sleep_for(std::chrono::microseconds(deltaTimeUS - renderTime));
+            else
+                std::cout << "This frame took too much time... " << renderTime << "us" << std::endl; 
+        }
     }
     renderer->Close();
     return 0;

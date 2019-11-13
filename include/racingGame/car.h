@@ -45,12 +45,12 @@ public:
 private:
     void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
     // Physics part
-    b2World* m_world;
-    b2Body* m_hull;
+    b2World* m_world = nullptr;
+    b2Body* m_hull = nullptr;
     std::vector<Wheel> m_wheels;
     // Rendering part
     glm::vec4 m_hullColor;
-    Polygon* m_hullPolygon;
+    Polygon* m_hullPolygon = nullptr;
     std::vector<Polygon*> m_wheelsPolygon;
     std::list<Polygon*> m_particlesPolygon;
 };

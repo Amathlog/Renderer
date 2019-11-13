@@ -40,6 +40,9 @@ public:
     bool leftPressed = false;
     bool rightPressed = false;
 
+    void Enable(bool enable) {m_enable = enable;}
+    bool IsEnabled() {return m_enable;}
+
 private:
     Renderer() = default;
     static inline Renderer* ms_instance = nullptr;
@@ -49,4 +52,7 @@ private:
     using MapToRenderable = std::unordered_map<unsigned int, const Renderable*>;
     MapToRenderable m_mapToRenderable;
     Camera m_camera;
+
+    bool m_enable = true;
+    bool m_initialize = false;
 };
