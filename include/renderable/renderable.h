@@ -13,14 +13,7 @@ public:
         m_ID = ++CURRENT_ID;
     }
 
-    virtual ~Renderable()
-    {
-        if (m_shader != nullptr)
-        {
-            delete m_shader;
-            m_shader = nullptr;
-        }
-    }
+    virtual ~Renderable() = default;
 
     virtual void CreateShader() = 0;
     void Draw(const glm::mat4& mvp) const;
