@@ -12,13 +12,18 @@
 #include <chrono>
 #include <filesystem>
 
-#include <gtx/string_cast.hpp> 
+#include <glm/gtx/string_cast.hpp> 
+
+#ifndef M_PI
+#define M_PI 3.14159265359f
+#endif
 
 
 bool Track::GenerateTrack()
 {
     std::default_random_engine random_engine;
-    random_engine.seed(std::chrono::system_clock::now().time_since_epoch().count());
+    unsigned int randomSeed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+    random_engine.seed(randomSeed);
     std::vector<glm::vec3> checkpoints;
     float startAlpha = -M_PI / Constants::CHECKPOINTS;
     std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
@@ -105,22 +110,22 @@ bool Track::GenerateTrack()
             break;
     }
     int i1 = -1, i2 = -1;
-    int i = track.size();
+    int idx = (int)track.size();
     // std::cout << i << std::endl;
     while (1)
     {
-        if (--i == 0)
+        if (--idx == 0)
             return false; // Failed
-        bool passThroughStart = track[i][0] > startAlpha && track[i-1][0] <= startAlpha;
+        bool passThroughStart = track[idx][0] > startAlpha && track[idx-1][0] <= startAlpha;
         if (passThroughStart && i2 == -1)
         {
             // std::cout << "Found i2..." << std::endl;
-            i2 = i;
+            i2 = idx;
         }
         else if (passThroughStart && i1 == -1)
         {
             // std::cout << "Found i1..." << std::endl;
-            i1 = i;
+            i1 = idx;
             break;
         }
     }
@@ -148,7 +153,7 @@ bool Track::GenerateTrack()
         int oneside = 0;
         for (unsigned int neg = 0; neg < Constants::BORDER_MIN_COUNT; ++neg)
         {
-            unsigned int index = neg + 1 > i ? i + track.size() - neg -1 : i - neg - 1;
+            unsigned int index = neg + 1 > i ? i + (unsigned int)track.size() - neg -1 : i - neg - 1;
             float beta1 = track[(index + 1) % track.size()][1];
             float beta2 = track[index][1];
             good &= std::abs(beta1 - beta2) > Constants::TRACK_TURN_RATE*0.2f;
@@ -161,15 +166,15 @@ bool Track::GenerateTrack()
     {
         for (unsigned int neg = 0; neg < Constants::BORDER_MIN_COUNT; ++neg)
         {
-            unsigned int index = neg > i ? i + track.size() - neg : i - neg;
+            unsigned int index = neg > i ? i + (unsigned int)track.size() - neg : i - neg;
             borders[index] = borders[index] || borders[i];
         }
     }
 
     // Store the path
-    for (unsigned int idx = 0; idx < track.size(); ++idx)
+    for (unsigned int i = 0; i < track.size(); ++i)
         // Add to the path
-        m_path.push_back(glm::vec2(track[idx][2], track[idx][3]));
+        m_path.push_back(glm::vec2(track[i][2], track[i][3]));
 
     // If we have no rendering, stop here
     if (!Renderer::GetInstance()->IsEnabled())
@@ -224,7 +229,7 @@ bool Track::GenerateTrack()
 
         if (borders[i])
         {
-            float side = std::signbit(p1[1] - p2[1]) ? -1 : 1;
+            float side = std::signbit(p1[1] - p2[1]) ? -1.0f : 1.0f;
             std::vector<float>& vertricesToFill = i % 2 == 0 ? whiteBorderVertrices : redBorderVertrices;
             std::vector<unsigned int>& indexesToFill = i % 2 == 0 ? whiteBorderIndexes : redBorderIndexes;
 
@@ -248,7 +253,7 @@ bool Track::GenerateTrack()
                 }
             );
 
-            unsigned int index = vertricesToFill.size() / 3 - 4;
+            index = (unsigned int)vertricesToFill.size() / 3 - 4;
             indexesToFill.insert(indexesToFill.end(),
                 {
                     index, index + 1, index + 2,
@@ -259,11 +264,7 @@ bool Track::GenerateTrack()
     }
 
     // Then create the polygons. For the track, use a specific shader
-    std::filesystem::path currentPath = std::filesystem::current_path();
-    Shader* trackShader = ShaderManager::GetInstance()->LoadShader(
-        (std::filesystem::current_path() / ".." / "shaders" / "track_shader.vs").c_str(),
-        (std::filesystem::current_path() / ".." / "shaders" / "track_shader.fs").c_str()
-    );
+    Shader* trackShader = ShaderManager::GetInstance()->LoadShader("track_shader.vs", "track_shader.fs");
 
     m_tilesPolygon = new Polygon(roadVertrices, roadIndexes, roadColor, trackShader);
     renderer->AddRenderable(m_tilesPolygon);

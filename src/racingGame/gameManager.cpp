@@ -1,6 +1,6 @@
 #include "racingGame/gameManager.h"
 
-#include "glm.hpp"
+#include "glm/glm.hpp"
 #include "Box2D/Box2D.h"
 #include "racingGame/car.h"
 

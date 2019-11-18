@@ -1,7 +1,7 @@
 #pragma once
   
 #include <string>
-#include "glm.hpp"
+#include "glm/glm.hpp"
 
 class Shader
 {
@@ -10,7 +10,7 @@ public:
     unsigned int m_ID;
   
     // constructor reads and builds the shader
-    Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const char* vertexShaderName, const char* fragmentShaderName);
     // use/activate the shader
     void Use() const;
     void Disable() const;
