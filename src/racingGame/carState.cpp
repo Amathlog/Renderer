@@ -4,6 +4,7 @@
 #include "utils/utils.h"
 
 #include <cmath>
+#include <sstream>
 
 #ifndef M_PI
 #define M_PI 3.14159265359f
@@ -60,6 +61,7 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     state.distanceFromRoad = glm::dot(positionToProjection, roadSide) > 0 ?
                              glm::length(positionToProjection) :
                              -glm::length(positionToProjection);
+    state.distanceFromRoad /= Constants::TRACK_WIDTH;
 
     state.carVelocityRoadRef = {
         glm::dot(carVelocity, roadDirection) / MAX_SPEED,
@@ -114,4 +116,24 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     }
 
     return state;
+}
+
+std::string CarState::ToString()
+{
+    std::stringstream res;
+    res << "Distance from road: " << distanceFromRoad << std::endl;
+    res << "Velocity: x=" << carVelocityRoadRef[0] << " ; y=" << carVelocityRoadRef[1] << std::endl;
+    res << "Angle with road:" << angleWithRoad << std::endl;
+    res << "Wheel angles: (" << wheelAngles[0] << ", " << wheelAngles[1] << ")" << std::endl;
+    res << "Wheel omegas: (" << wheelOmegas[0] << ", " << wheelOmegas[1] << ", " << wheelOmegas[2] << ", " << wheelOmegas[3] << ")" << std::endl;
+    res << "Car omega: " << carOmega << std::endl;
+    res << "Drift angle: " << driftAngle << std::endl;
+    res << "Projections offsets: " << std::endl;
+    for (size_t i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)
+    {
+        res << "    *" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m: car(" << pointsFurtherCarRef[2 * i] << ", " \
+            << pointsFurtherCarRef[2 * i + 1] << ") road(" << pointsFurtherRoadRef[2 * i] << ", " << pointsFurtherRoadRef[2 * i + 1] \
+            << ")" << std::endl;
+    }
+    return res.str();
 }

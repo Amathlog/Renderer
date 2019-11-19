@@ -49,6 +49,7 @@ public:
     const std::vector<Wheel>& GetWheels() const { return m_wheels; }
 
     void UpdateTrackIndex(const Track::Path& path);
+    unsigned int GetCurrentTrackIndex() { return m_currentTrackIndex; }
 private:
     void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
     // Physics part

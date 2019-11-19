@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include "racingGame/track.h"
 #include "racingGame/constants.h"
 
@@ -66,4 +67,6 @@ struct CarState
     std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurtherRoadRef;
 
     static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex);
+
+    std::string ToString();
 };
