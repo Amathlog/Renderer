@@ -84,7 +84,6 @@ void GameManager::UpdateCamera()
 
 void GameManager::Step(float dt) 
 {
-    Renderer* renderer = Renderer::GetInstance();
     bool shouldReset = false;
     for (Car* car : m_cars)
     {

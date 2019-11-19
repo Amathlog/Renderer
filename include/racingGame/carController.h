@@ -1,7 +1,7 @@
 #pragma once
 
 class Car;
-class CarState;
+struct CarState;
 
 class CarController
 {
