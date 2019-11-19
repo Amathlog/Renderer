@@ -8,6 +8,8 @@
 #include <filesystem>
 #ifdef WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif // WIN32
 
 #include <glm/gtc/type_ptr.hpp>
@@ -25,8 +27,8 @@ Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName)
     try 
     {
         std::filesystem::path shaderDir;
+	char currentPath[1024];
 #ifdef WIN32
-        char currentPath[MAX_PATH];
         HMODULE hModule = GetModuleHandle(NULL);
         if (hModule != NULL)
         {
@@ -35,7 +37,7 @@ Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName)
             shaderDir = shaderDir.parent_path();
         }
 #else
-        ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+        ssize_t count = readlink("/proc/self/exe", currentPath, 1024);
         if (count != -1) 
         {
             shaderDir = currentPath;
