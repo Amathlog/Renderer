@@ -1,6 +1,6 @@
 #include "renderable/renderable.h"
-#include "gtx/transform.hpp"
-#include "gtx/string_cast.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 void Renderable::AddChild(Renderable* child)
 {

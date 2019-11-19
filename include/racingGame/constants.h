@@ -97,7 +97,7 @@ namespace Constants
     constexpr float BORDER = 8.0f * SCALE_TRACK;
     constexpr unsigned int BORDER_MIN_COUNT = 6;
 
-    constexpr float ROAD_COLOR[] = {0.4, 0.4, 0.4};
-    constexpr float BACKGROUND_COLOR1[] = {0.4, 0.8, 0.4};
-    constexpr float BACKGROUND_COLOR2[] = {0.4, 0.9, 0.4};
+    constexpr float ROAD_COLOR[] = {0.4f, 0.4f, 0.4f};
+    constexpr float BACKGROUND_COLOR1[] = {0.4f, 0.8f, 0.4f};
+    constexpr float BACKGROUND_COLOR2[] = {0.4f, 0.9f, 0.4f};
 };

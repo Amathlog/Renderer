@@ -67,7 +67,7 @@ void Car::InitializePhysics()
                 continue;
             polygon.push_back(b2Vec2(vertrices[3*j] * Constants::SCALE_CAR, vertrices[3*j + 1] * Constants::SCALE_CAR));
         }
-        shape.Set(polygon.data(), polygon.size());
+        shape.Set(polygon.data(), (int32)polygon.size());
         i += size;
         m_hull->CreateFixture(&shape, 1.0f);
     }

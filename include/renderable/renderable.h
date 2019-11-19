@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 #include "shaders/shaders.h"
 #include <iostream>
 #include <unordered_map>

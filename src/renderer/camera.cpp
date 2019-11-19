@@ -1,6 +1,6 @@
 #include "renderer/camera.h"
 
-#include "gtx/transform.hpp"
+#include "glm/gtx/transform.hpp"
 
 glm::mat4 Camera::PerspectiveParams::GetMatrix() const
 {

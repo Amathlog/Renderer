@@ -8,8 +8,8 @@
 #include <iostream>
 #include <cstring>
 
-#include "glm.hpp"
-#include "gtx/transform.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 
 
 #include "GLFW/glfw3.h"

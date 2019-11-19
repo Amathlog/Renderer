@@ -5,10 +5,14 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
+#ifdef WIN32
+#include <windows.h>
+#endif // WIN32
 
-#include <gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -20,9 +24,29 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
     try 
     {
+        std::filesystem::path shaderDir;
+#ifdef WIN32
+        char currentPath[MAX_PATH];
+        HMODULE hModule = GetModuleHandle(NULL);
+        if (hModule != NULL)
+        {
+            GetModuleFileName(hModule, currentPath, (sizeof(currentPath)));
+            shaderDir = currentPath;
+            shaderDir = shaderDir.parent_path();
+        }
+#else
+        ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+        if (count != -1) 
+        {
+            shaderDir = currentPath;
+            shaderDir = shaderDir.parent_path();
+        }
+#endif // WIN32
+        // First get the current directory
+        shaderDir.append("shaders");
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
+        vShaderFile.open(shaderDir / vertexShaderName);
+        fShaderFile.open(shaderDir / fragmentShaderName);
         std::stringstream vShaderStream, fShaderStream;
         // read file's buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
@@ -34,7 +58,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         vertexCode   = vShaderStream.str();
         fragmentCode = fShaderStream.str();
     }
-    catch (const std::ifstream::failure& e)
+    catch (const std::ifstream::failure&)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }

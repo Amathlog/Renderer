@@ -7,8 +7,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <gtc/type_ptr.hpp>
-#include <gtx/string_cast.hpp> 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp> 
 
 #include <iostream>
 #include <filesystem>
@@ -24,7 +24,7 @@ Polygon::Polygon(const std::vector<float>& vertrices,
     else
         CreateShader();
 
-    m_nbVertrices = indexes.size();
+    m_nbVertrices = (unsigned int)indexes.size();
     m_color = color;
 
     glGenVertexArrays(1, &m_VAO); 
@@ -57,11 +57,7 @@ Polygon::~Polygon()
 
 void Polygon::CreateShader()
 {
-    std::filesystem::path currentPath = std::filesystem::current_path();
-    m_shader = ShaderManager::GetInstance()->LoadShader(
-        (std::filesystem::current_path() / ".." / "shaders" / "polygon_shader.vs").c_str(),
-        (std::filesystem::current_path() / ".." / "shaders" / "polygon_shader.fs").c_str()
-    );
+    m_shader = ShaderManager::GetInstance()->LoadShader("polygon_shader.vs", "polygon_shader.fs");
 }
 
 void Polygon::InternalDraw(const glm::mat4& mvp) const
