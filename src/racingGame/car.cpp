@@ -150,18 +150,50 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
     UpdateRendering();
 }
 
-glm::vec3 Car::GetPosition()
+glm::vec2 Car::GetPosition() const
 {
     if (m_hull == nullptr)
-        return glm::vec3(0.0f);
+        return glm::vec2(0.0f);
     b2Vec2 pos = m_hull->GetPosition();
-    return glm::vec3(pos.x, pos.y, 0.0f);
+    return glm::vec2(pos.x, pos.y);
 }
 
-float Car::GetAngle(){
+float Car::GetAngle() const
+{
     if (m_hull == nullptr)
         return 0.0f;
     return m_hull->GetAngle();
+}
+
+glm::vec2 Car::GetVelocity() const
+{
+    if (m_hull == nullptr)
+        return glm::vec2(0.0f);
+    b2Vec2 velocity = m_hull->GetLinearVelocity();
+    return glm::vec2(velocity.x, velocity.y);
+}
+
+float Car::GetOmega() const
+{
+    if (m_hull == nullptr)
+        return 0.0f;
+    return m_hull->GetAngularVelocity();
+}
+
+glm::vec2 Car::GetForward() const
+{
+    if (m_hull == nullptr)
+        return glm::vec2(0.0f);
+    b2Vec2 forward = m_hull->GetWorldVector(b2Vec2(0.0f, 1.0f));
+    return glm::vec2(forward.x, forward.y);
+}
+
+glm::vec2 Car::GetSide() const
+{
+    if (m_hull == nullptr)
+        return glm::vec2(0.0f);
+    b2Vec2 side = m_hull->GetWorldVector(b2Vec2(1.0f, 0.0f));
+    return glm::vec2(side.x, side.y);
 }
 
 void Car::UpdateRendering()
@@ -169,10 +201,10 @@ void Car::UpdateRendering()
     if (m_hullPolygon == nullptr || m_hull == nullptr)
         return;
     
-    glm::vec3 pos = GetPosition();
+    glm::vec2 pos = GetPosition();
     pos[0] /= Constants::SCALE_CAR;
     pos[1] /= Constants::SCALE_CAR;
-    m_hullPolygon->GetPosition() = pos;
+    m_hullPolygon->GetPosition() = glm::vec3(pos.x, pos.y, 0.0f);
     m_hullPolygon->GetRotation()[2] = GetAngle();
 
     for (unsigned int i = 0; i < m_wheels.size(); ++i)

@@ -63,10 +63,11 @@ void GameManager::UpdateCamera()
     camera.SetUp(up);
 
     // Snap the camera to the car, minus an offset, to see more of the road
-    glm::vec3 pos = m_cars[0]->GetPosition();
-    pos[2] = camera.GetPosition()[2];
-    pos += up * 10.0f;
-    camera.SetPosition(pos);
+    glm::vec2 pos = m_cars[0]->GetPosition();
+    glm::vec3 cameraNewPos(pos[0], pos[1], camera.GetPosition()[2]);
+    cameraNewPos[2] = camera.GetPosition()[2];
+    cameraNewPos += up * 10.0f;
+    camera.SetPosition(cameraNewPos);
 }
 
 void GameManager::Step(float dt) 
@@ -78,7 +79,7 @@ void GameManager::Step(float dt)
     for (auto car : m_cars)
     {
         // Check if the car is out
-        const glm::vec3& carPos = car->GetPosition();
+        const glm::vec2& carPos = car->GetPosition();
         if (std::abs(carPos[0]) > 0.85f * Constants::PLAYFIELD ||
             std::abs(carPos[1]) > 0.85f * Constants::PLAYFIELD)
         {
