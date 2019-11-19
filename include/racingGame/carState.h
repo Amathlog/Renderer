@@ -2,6 +2,7 @@
 
 #include <array>
 #include "racingGame/track.h"
+#include "racingGame/constants.h"
 
 
 /// Description of a car state
@@ -21,11 +22,38 @@
 
 class Car;
 
-struct CarState
+// Precompute indexes and distances, for better performances
+struct SamplingIndexes
 {
     constexpr static inline size_t SAMPLING_INDEXES_SIZE = 4;
-    constexpr static inline std::array<float, SAMPLING_INDEXES_SIZE> SAMPLING_DISTANCES = {3.0f, 5.0f, 10.0f, 25.0f};
+    constexpr static inline std::array<float, SAMPLING_INDEXES_SIZE> SAMPLING_DISTANCES = { 3.0f, 5.0f, 10.0f, 25.0f };
+
+    constexpr SamplingIndexes() : precomputedDistances(), precomputedIndexes()
+    {
+        // We do not use math functions because they are not constexpr
+        for (auto i = 0; i < SAMPLING_INDEXES_SIZE; ++i)
+        {
+            const float distanceAhead = SAMPLING_DISTANCES[i];
+            const float division = distanceAhead / Constants::TRACK_DETAIL_STEP;
+            // Floor of the division
+            const size_t index = static_cast<size_t>(division);
+            // Float mod of the division
+            const float remainingDistance = division - static_cast<float>(index);
+
+            precomputedDistances[i] = remainingDistance;
+            precomputedIndexes[i] = index;
+        }
+    }
+
+    float precomputedDistances[SAMPLING_INDEXES_SIZE];
+    size_t precomputedIndexes[SAMPLING_INDEXES_SIZE];
+};
+
+struct CarState
+{
     constexpr static inline float MAX_SPEED = 40.0f;
+    constexpr static inline float MAX_OMEGA = 40.0f;
+    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 2 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
 
     float distanceFromRoad;
     std::array<float, 2> carVelocityRoadRef;
@@ -33,10 +61,9 @@ struct CarState
     std::array<float, 2> wheelAngles;
     std::array<float, 4> wheelOmegas;
     float carOmega;
-    bool isDrifting;
     float driftAngle;
-    std::array<float, SAMPLING_INDEXES_SIZE*2> pointsFurtherCarRef;
-    std::array<float, SAMPLING_INDEXES_SIZE*2> pointsFurtherRoadRef;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurtherCarRef;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurtherRoadRef;
 
     static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex);
 };

@@ -148,6 +148,8 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
         wheel.body->SetTransform(box2DPos + wheel.body->GetPosition(), angle);
     }
     UpdateRendering();
+    m_isDrifting = false;
+    m_currentTrackIndex = 0;
 }
 
 glm::vec2 Car::GetPosition() const
@@ -163,37 +165,6 @@ float Car::GetAngle() const
     if (m_hull == nullptr)
         return 0.0f;
     return m_hull->GetAngle();
-}
-
-glm::vec2 Car::GetVelocity() const
-{
-    if (m_hull == nullptr)
-        return glm::vec2(0.0f);
-    b2Vec2 velocity = m_hull->GetLinearVelocity();
-    return glm::vec2(velocity.x, velocity.y);
-}
-
-float Car::GetOmega() const
-{
-    if (m_hull == nullptr)
-        return 0.0f;
-    return m_hull->GetAngularVelocity();
-}
-
-glm::vec2 Car::GetForward() const
-{
-    if (m_hull == nullptr)
-        return glm::vec2(0.0f);
-    b2Vec2 forward = m_hull->GetWorldVector(b2Vec2(0.0f, 1.0f));
-    return glm::vec2(forward.x, forward.y);
-}
-
-glm::vec2 Car::GetSide() const
-{
-    if (m_hull == nullptr)
-        return glm::vec2(0.0f);
-    b2Vec2 side = m_hull->GetWorldVector(b2Vec2(1.0f, 0.0f));
-    return glm::vec2(side.x, side.y);
 }
 
 void Car::UpdateRendering()
@@ -297,7 +268,7 @@ void Car::Step(float dt)
         pForce *= 205000.0f * Constants::SCALE_CAR * Constants::SCALE_CAR;
         float force = std::sqrt(std::pow(fForce, 2) + std::pow(pForce, 2));
 
-        // # Skid trace
+        // Skid trace
         // if abs(force) > 2.0*friction_limit:
         //     if w.skid_particle and w.skid_particle.grass==grass and len(w.skid_particle.poly) < 30:
         //         w.skid_particle.poly.append( (w.position[0], w.position[1]) )
@@ -326,4 +297,25 @@ void Car::Step(float dt)
         // std::cout << "After Wheel: " << wheel.omega << std::endl;
         // std::cout << "Force to apply: " << forceToApply.x << " " << forceToApply.y << std::endl;
     }
+}
+
+void Car::UpdateTrackIndex(const Track::Path& path)
+{
+    glm::vec2 position = GetPosition();
+    float minDistance = -1.0f;
+    unsigned int closestIndex = 0;
+    for (int i = -2; i <= 2; ++i)
+    {
+        int index = (m_currentTrackIndex + i) % static_cast<int>(path.size());
+        if (index < 0)
+            index += static_cast<int>(path.size());
+        unsigned int finalIndex = static_cast<unsigned int>(index);
+        float distance = glm::length(path[finalIndex] - position);
+        if (minDistance < 0.0f || distance < minDistance)
+        {
+            minDistance = distance;
+            closestIndex = finalIndex;
+        }
+    }
+    m_currentTrackIndex = closestIndex;
 }

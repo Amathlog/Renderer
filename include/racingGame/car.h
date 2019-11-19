@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include <vector>
 #include <list>
+#include "racingGame/track.h"
 
 class b2Body;
 class b2World;
@@ -41,11 +42,13 @@ public:
 
     void SetIntialState(const glm::vec2& pos, float angle);
     glm::vec2 GetPosition() const;
-    glm::vec2 GetVelocity() const;
-    float GetOmega() const;
-    glm::vec2 GetForward() const;
-    glm::vec2 GetSide() const;
     float GetAngle() const;
+    bool IsDrifting() const { return m_isDrifting; }
+
+    const b2Body* GetHull() const { return m_hull; }
+    const std::vector<Wheel>& GetWheels() const { return m_wheels; }
+
+    void UpdateTrackIndex(const Track::Path& path);
 private:
     void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
     // Physics part
@@ -57,4 +60,7 @@ private:
     Polygon* m_hullPolygon = nullptr;
     std::vector<Polygon*> m_wheelsPolygon;
     std::list<Polygon*> m_particlesPolygon;
+    bool m_isDrifting = false;
+    // The rest part
+    unsigned int m_currentTrackIndex = 0;
 };

@@ -7,6 +7,7 @@
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
 #include "racingGame/constants.h"
+#include "racingGame/carState.h"
 
 GameManager::~GameManager()
 {
@@ -96,6 +97,10 @@ void GameManager::Step(float dt)
         car->Brake(renderer->downPressed ? 0.8f : 0.0f);
         car->Step(dt);
         car->UpdateRendering();
+
+        // Then compute the state
+        car->UpdateTrackIndex(m_track.GetPath());
+        CarState::GenerateState(*car, m_track.GetPath(), 0);
     }
 
     m_world->Step(dt, 6*30, 2*30);
