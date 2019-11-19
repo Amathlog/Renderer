@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 #include "renderer/camera.h"
+#include <functional>
+#include <unordered_map>
 
 struct GLFWwindow;
 class Shader;
@@ -43,6 +45,9 @@ public:
     void Enable(bool enable) {m_enable = enable;}
     bool IsEnabled() {return m_enable;}
 
+    void RegisterInputCallback(int inputKey, std::function<void(int)> callback);
+    void ClearInputCallbacks() { m_inputCallbacks.clear(); }
+
 private:
     Renderer() = default;
     static inline Renderer* ms_instance = nullptr;
@@ -55,4 +60,7 @@ private:
 
     bool m_enable = true;
     bool m_initialize = false;
+
+    using VectorInputCallbacks = std::vector<std::pair<int, std::function<void(int)>>>;
+    VectorInputCallbacks m_inputCallbacks;
 };

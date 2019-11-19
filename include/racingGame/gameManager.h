@@ -28,4 +28,7 @@ private:
     Track m_track;
     std::vector<Car*> m_cars;
     unsigned int m_numberOfPlayers = 0;
+
+    float m_elapsedTime = 0.0f;
+    unsigned int m_nbFrames = 0;
 };

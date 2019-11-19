@@ -100,4 +100,7 @@ namespace Constants
     constexpr float ROAD_COLOR[] = {0.4f, 0.4f, 0.4f};
     constexpr float BACKGROUND_COLOR1[] = {0.4f, 0.8f, 0.4f};
     constexpr float BACKGROUND_COLOR2[] = {0.4f, 0.9f, 0.4f};
+
+    // How many frames between state computation (and action taken by the network)
+    constexpr unsigned int STATE_INTERVAL = 5;
 };

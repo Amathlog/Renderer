@@ -8,6 +8,10 @@
 #include "renderer/camera.h"
 #include "racingGame/constants.h"
 #include "racingGame/carState.h"
+#include "racingGame/humanCarController.h"
+
+#include <iostream>
+#include <GLFW/glfw3.h>
 
 GameManager::~GameManager()
 {
@@ -41,6 +45,9 @@ void GameManager::Reset()
     if (m_world == nullptr)
         return;
 
+    Renderer* renderer = Renderer::GetInstance();
+    renderer->ClearInputCallbacks();
+
     ClearCars();
     m_track.ClearTrack();
     while(!m_track.GenerateTrack());
@@ -49,6 +56,10 @@ void GameManager::Reset()
         Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
         car->SetIntialState(m_track.GetPath()[0], m_track.GetIntialAngle());
         m_cars.push_back(car);
+
+        // Add controller
+        HumanCarController* controller = new HumanCarController(1);
+        car->AttachController(controller);
     }
 }
 
@@ -73,11 +84,9 @@ void GameManager::UpdateCamera()
 
 void GameManager::Step(float dt) 
 {
-    static float t = 0.0F;
-    t += dt;
     Renderer* renderer = Renderer::GetInstance();
     bool shouldReset = false;
-    for (auto car : m_cars)
+    for (Car* car : m_cars)
     {
         // Check if the car is out
         const glm::vec2& carPos = car->GetPosition();
@@ -87,20 +96,15 @@ void GameManager::Step(float dt)
             shouldReset = true;
             break;
         }
-        car->Gas(renderer->upPressed ? 1.0f : 0.0f);
-        if (renderer->leftPressed)
-            car->Steer(-1.0f);
-        else if (renderer->rightPressed)
-            car->Steer(1.0f);
-        else 
-            car->Steer(0.0f);
-        car->Brake(renderer->downPressed ? 0.8f : 0.0f);
+        
+        CarController* controller = car->GetController();
+        if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
+        {
+            controller->Update(CarState::GenerateState(*car, m_track.GetPath(), car->GetCurrentTrackIndex()), *car);
+        }
+
         car->Step(dt);
         car->UpdateRendering();
-
-        // Then compute the state
-        car->UpdateTrackIndex(m_track.GetPath());
-        CarState::GenerateState(*car, m_track.GetPath(), 0);
     }
 
     m_world->Step(dt, 6*30, 2*30);
@@ -109,4 +113,7 @@ void GameManager::Step(float dt)
 
     if (shouldReset)
         Reset();
+
+    m_elapsedTime += dt;
+    m_nbFrames++;
 };

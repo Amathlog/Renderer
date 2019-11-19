@@ -105,10 +105,13 @@ void Renderer::ProcessInput()
     // if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
     //     m_camera.Zoom(-factor);
 
-    upPressed = glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS;
-    downPressed = glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS;
-    leftPressed = glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS;
-    rightPressed = glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
+    for (auto it : m_inputCallbacks)
+        it.second(glfwGetKey(m_window, it.first));
+
+    //upPressed = glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS;
+    //downPressed = glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS;
+    //leftPressed = glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS;
+    //rightPressed = glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(factor, 0.0f, 0.0f));
@@ -147,4 +150,12 @@ void Renderer::RemoveRenderable(unsigned int id)
     MapToRenderable::iterator it = m_mapToRenderable.find(id);
     if (it != m_mapToRenderable.end())
         m_mapToRenderable.erase(it);
+}
+
+void Renderer::RegisterInputCallback(int inputKey, std::function<void(int)> callback)
+{
+    if (!m_enable)
+        return;
+
+    m_inputCallbacks.push_back(VectorInputCallbacks::value_type(inputKey, callback));
 }

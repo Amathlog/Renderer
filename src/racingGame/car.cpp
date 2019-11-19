@@ -1,5 +1,6 @@
 #include "racingGame/car.h"
 #include "racingGame/constants.h"
+#include "racingGame/carController.h"
 #include "renderer/renderer.h"
 #include "renderable/polygon.h"
 #include "Box2D/Box2D.h"
@@ -41,6 +42,13 @@ Car::~Car()
             m_world->DestroyBody(wheel.body);
         }
         m_world->DestroyBody(m_hull);
+    }
+
+    // Controller
+    if (m_controller != nullptr)
+    {
+        delete m_controller;
+        m_controller = nullptr;
     }
 }
 

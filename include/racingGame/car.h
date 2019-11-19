@@ -9,6 +9,7 @@ class b2Body;
 class b2World;
 class b2RevoluteJoint;
 class Polygon;
+class CarController;
 
 class Car
 {
@@ -33,6 +34,9 @@ public:
     void InitializePhysics();
     void InitializeRendering();
     void Step(float dt);
+
+    void AttachController(CarController* controller) { m_controller = controller; }
+    CarController* GetController() { return m_controller; }
 
     void UpdateRendering();
 
@@ -64,4 +68,5 @@ private:
     bool m_isDrifting = false;
     // The rest part
     unsigned int m_currentTrackIndex = 0;
+    CarController* m_controller = nullptr;
 };
