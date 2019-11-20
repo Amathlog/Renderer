@@ -1,6 +1,6 @@
 #pragma once
 
-#include "racingGame/carController.h"
+#include "racingGame/controllers/carController.h"
 
 class HumanCarController : public CarController
 {

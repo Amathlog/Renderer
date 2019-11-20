@@ -1,7 +1,7 @@
 #include "utils/utils.h"
 #include <cmath>
 
-constexpr float EPSILON = 1e-6;
+constexpr float EPSILON = 1e-6f;
 
 void Utils::NormalizeWithEpsilonOnPlace(glm::vec2& v)
 {

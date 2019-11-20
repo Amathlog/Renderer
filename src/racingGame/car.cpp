@@ -1,6 +1,6 @@
 #include "racingGame/car.h"
 #include "racingGame/constants.h"
-#include "racingGame/carController.h"
+#include "racingGame/controllers/carController.h"
 #include "renderer/renderer.h"
 #include "renderable/polygon.h"
 #include "Box2D/Box2D.h"
