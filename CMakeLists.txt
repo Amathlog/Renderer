@@ -12,8 +12,13 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # set(CMAKE_CXX_FLAGS "-Wall")
+if(WIN32)
+set(CMAKE_CXX_FLAGS_DEBUG "/ZI /Od")
+set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+else(WIN32)
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+endif(WIN32)
 
 # Include OpenGL
 find_package(OpenGL REQUIRED)
@@ -46,10 +51,9 @@ add_subdirectory(external/box2d)
 include_directories(external/box2d)
 
 # Include main project
-file(GLOB RENDERER_SRC
+file(GLOB_RECURSE RENDERER_SRC
     "include/*.h"
     "src/*.cpp"
-    "src/*/*.cpp"
     "external/glad/src/glad.c"
 )
 
