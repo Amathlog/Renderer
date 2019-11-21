@@ -2,6 +2,7 @@
 #include "renderer/renderer.h"
 #include "renderable/polygon.h"
 #include <utils/utils.h>
+#include <renderable/line.h>
 
 constexpr float LINE_WIDTH = 1.0f;
 
@@ -50,14 +51,13 @@ void DebugManager::DrawLine(const std::string& id, const glm::vec3& p1, const gl
     if (!m_enabled)
         return;
 
-    // Recycle previous item
-    Polygon* polygon = nullptr;
+    Line* line = nullptr;
 
     auto it = m_mapDebugFigures.find(id);
     if (it != m_mapDebugFigures.end())
     {
-        polygon = dynamic_cast<Polygon*>(it->second.renderable);
-        if (polygon == nullptr)
+        line = dynamic_cast<Line*>(it->second.renderable);
+        if (line == nullptr)
         {
             // Previous Id existed, but was not a polygon...
             m_mapDebugFigures.erase(it);
@@ -65,53 +65,13 @@ void DebugManager::DrawLine(const std::string& id, const glm::vec3& p1, const gl
         }
     }
 
-    constexpr float length = 1.0f;
-
-    if (polygon == nullptr)
+    if (line == nullptr)
     {
-
-        std::vector<float> vertrices = {
-            -LINE_WIDTH * 0.5f, 0.0f, 0.0f,
-            LINE_WIDTH * 0.5f, 0.0f, 0.0f,
-            LINE_WIDTH * 0.5f, length, 0.0f,
-            -LINE_WIDTH * 0.5f, length, 0.0f
-        };
-
-        std::vector<unsigned int> indexes = { 0, 1, 2, 0, 2, 3 };
-
-        polygon = new Polygon(vertrices, indexes, color);
+        line = new Line(p1, p2, color);
     }
     else
     {
-        polygon->GetColor() = color;
-    }
-
-    polygon->GetPosition() = p1;
-
-    glm::vec3 line = p2 - p1;
-    polygon->GetScale()[1] = glm::length(line) / length;
-    //polygon->GetScale()[1] = 10.0f;
-    glm::vec3& rotation = polygon->GetRotation();
-    Utils::NormalizeWithEpsilonOnPlace(line);
-
-    // Compute rotation matrix
-    // https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-    glm::vec3 startVec(0.0f, 1.0f, 0.0f);
-    glm::vec3 v = glm::cross(line, startVec);
-    float cosine = glm::dot(line, startVec);
-
-    if (cosine == -1.0f)
-    {
-        // It means that the vector points to (0.0f, -1.0f, 0.0f), which means a roation of Pi around Z
-        polygon->GetRotation()[2] = M_PI;
-    }
-    else
-    {
-        glm::mat3 skewSymmetricV = { {0.0f, v[2], -v[1]}, {-v[2], 0.0f, v[0]}, {v[1], -v[0], 0.0f} };
-        glm::mat3 identity = { {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f} };
-        glm::mat3 rotation = identity + skewSymmetricV + skewSymmetricV * skewSymmetricV * 1.0f / (1.0f + cosine);
-
-        polygon->SetRoationFromMatrix(rotation);
+        line->UpdatePoints(p1, p2);
     }
 
     if (it != m_mapDebugFigures.end())
@@ -120,11 +80,11 @@ void DebugManager::DrawLine(const std::string& id, const glm::vec3& p1, const gl
     }
     else
     {
-        Renderer::GetInstance()->AddRenderable(polygon);
+        Renderer::GetInstance()->AddRenderable(line);
 
         it = m_mapDebugFigures.emplace(id, DebugFigure()).first;
         it->second.id = id;
-        it->second.renderable = polygon;
+        it->second.renderable = line;
         it->second.frameTimeRemaining = frameTime;
     }
 }

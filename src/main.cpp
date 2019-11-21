@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
     GameConfig config;
     config.enableRendering = argc > 1 ? strcmp(argv[1], "--no-render") != 0 : true;
-    config.attachCamera = false;
+    config.attachCamera = true;
 
     GameManager gameManager(config);
     

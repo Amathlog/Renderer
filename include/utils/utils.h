@@ -16,4 +16,6 @@ namespace Utils
     float GetAngle(const glm::vec3 v1, const glm::vec3 v2);
 
     glm::vec2 Convertb2Toglm(const b2Vec2& v);
+
+    glm::mat4 GetRotationMatrixFromP1toP2(const glm::vec3& p1, glm::vec3& p2);
 }

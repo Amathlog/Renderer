@@ -25,7 +25,7 @@ public:
 
     const glm::vec3& GetRotation() const {return m_rotation;}
     glm::vec3& GetRotation() {return m_rotation;}
-    void SetRoationFromMatrix(const glm::mat3& mat);
+    void SetRoationFromMatrix(const glm::mat4& mat);
 
     const glm::vec3& GetScale() const {return m_scale;}
     glm::vec3& GetScale() {return m_scale;}

@@ -127,10 +127,10 @@ void GameManager::Step(float dt)
 
     m_world->Step(dt, 6*30, 2*30);
 
-    glm::vec2 p1 = m_track->GetPath()[0];
-    glm::vec2 p2 = m_track->GetPath()[20];
+    //glm::vec2 p1 = m_track->GetPath()[0];
+    //glm::vec2 p2 = m_track->GetPath()[20];
 
-    DebugManager::GetInstance()->DrawLine("track", glm::vec3(p1.x, p1.y, 0.0f), glm::vec3(p2.x, p2.y, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    //DebugManager::GetInstance()->DrawLine("track", glm::vec3(p1.x, p1.y, 0.0f), glm::vec3(p2.x, p2.y, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
     //DebugManager::GetInstance()->DrawLine("track", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
     if (m_config.attachCamera)

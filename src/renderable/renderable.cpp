@@ -45,7 +45,7 @@ glm::mat4 Renderable::GetTransform() const
     return transform;
 }
 
-void Renderable::SetRoationFromMatrix(const glm::mat3& mat)
+void Renderable::SetRoationFromMatrix(const glm::mat4& mat)
 {
     // https://www.learnopencv.com/rotation-matrix-to-euler-angles/
 

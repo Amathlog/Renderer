@@ -21,6 +21,5 @@ protected:
     
     unsigned int m_VBO;
     unsigned int m_VAO;
-    unsigned int m_EBO;
     glm::vec4 m_color;
 };
