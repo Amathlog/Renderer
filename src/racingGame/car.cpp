@@ -10,6 +10,8 @@ Car::Car(b2World* world, const glm::vec4& color)
     : m_world(world)
     , m_hullColor(color)
 {
+    static unsigned int IDS = 1;
+    m_id = IDS++;
     InitializePhysics();
     InitializeRendering();
 }

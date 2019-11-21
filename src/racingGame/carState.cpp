@@ -129,7 +129,8 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
             Colors::RED,
             Colors::YELLOW,
             Colors::CYAN,
-            Colors::BLACK
+            Colors::BLACK,
+            Colors::WHITE
         };
 
         for (unsigned int i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)

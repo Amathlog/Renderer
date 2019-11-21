@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     config.attachCamera = true;
     config.debugInfo = true;
 
-    GameManager gameManager(config);
+    GameManager gameManager(config, nullptr);
     
     return gameManager.Run();
 }

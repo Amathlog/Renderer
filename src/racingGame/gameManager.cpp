@@ -3,12 +3,14 @@
 #include "glm/glm.hpp"
 #include "Box2D/Box2D.h"
 #include "racingGame/car.h"
+#include "racingGame/track.h"
 
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
 #include "racingGame/constants.h"
 #include "racingGame/carState.h"
 #include "racingGame/controllers/humanCarController.h"
+#include "racingGame/scenarios/scenario.h"
 
 #include <iostream>
 #include <chrono> 
@@ -19,8 +21,9 @@
 
 #define PROFILING
 
-GameManager::GameManager(const GameConfig& config)
+GameManager::GameManager(const GameConfig& config, Scenario* scenario)
     : m_config(config)
+    , m_scenario(scenario)
 {
 
 }
@@ -53,9 +56,11 @@ void GameManager::Initialize()
 
 void GameManager::ClearCars()
 {
-    for(unsigned int i = 0; i < m_cars.size(); ++i)
+    for (auto it : m_cars)
     {
-        delete m_cars[i];
+        if (m_scenario != nullptr)
+            m_scenario->OnVehicleUnspawned(it.second->GetId());
+        delete it.second;
     }
     m_cars.clear();
 }
@@ -73,13 +78,7 @@ void GameManager::Reset()
     while(!m_track->GenerateTrack());
     for (unsigned int i = 0; i < m_numberOfPlayers; ++i)
     {
-        Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-        car->SetIntialState(m_track->GetPath()[0], m_track->GetIntialAngle());
-        m_cars.push_back(car);
-
-        // Add controller
-        HumanCarController* controller = new HumanCarController(1);
-        car->AttachController(controller);
+        SpawnVehicle();
     }
 }
 
@@ -89,13 +88,15 @@ void GameManager::UpdateCamera()
         return;
     Camera& camera = Renderer::GetInstance()->GetCamera();
 
+    Car* firstCar = m_cars.begin()->second;
+
     // Set the rotation with the up vector
-    float angle = m_cars[0]->GetAngle();
+    float angle = firstCar->GetAngle();
     glm::vec3 up(glm::vec3(-std::sin(angle), std::cos(angle), 0.0f));
     camera.SetUp(up);
 
     // Snap the camera to the car, minus an offset, to see more of the road
-    glm::vec2 pos = m_cars[0]->GetPosition();
+    glm::vec2 pos = firstCar->GetPosition();
     glm::vec3 cameraNewPos(pos[0], pos[1], camera.GetPosition()[2]);
     cameraNewPos[2] = camera.GetPosition()[2];
     cameraNewPos += up * 10.0f;
@@ -106,8 +107,9 @@ void GameManager::Step(float dt)
 {
     bool shouldReset = false;
     unsigned int i = 0;
-    for (Car* car : m_cars)
+    for (auto it : m_cars)
     {
+        Car* car = it.second;
         // Check if the car is out
         const glm::vec2& carPos = car->GetPosition();
         if (std::abs(carPos[0]) > 0.85f * Constants::PLAYFIELD ||
@@ -146,6 +148,32 @@ void GameManager::Step(float dt)
     m_elapsedTime += dt;
     m_nbFrames++;
 };
+
+void GameManager::SpawnVehicle()
+{
+    Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    car->SetIntialState(m_track->GetPath()[0], m_track->GetIntialAngle());
+    m_cars.emplace(car->GetId(), car);
+
+    // Add controller
+    HumanCarController* controller = new HumanCarController(1);
+    car->AttachController(controller);
+
+    if (m_scenario != nullptr)
+        m_scenario->OnVehicleSpawned(car);
+}
+
+void GameManager::UnspawnVehicle(unsigned int id)
+{
+    auto it = m_cars.find(id);
+    if (it != m_cars.end())
+    {
+        if (m_scenario != nullptr)
+            m_scenario->OnVehicleUnspawned(it->second->GetId());
+        delete it->second;
+    }
+    m_cars.erase(it);
+}
 
 int GameManager::Run()
 {

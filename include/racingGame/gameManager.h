@@ -1,10 +1,11 @@
 #pragma once
 
-#include "racingGame/track.h"
-#include <vector>
+#include <unordered_map>
 
 class b2World;
 class Car;
+class Track;
+class Scenario;
 
 struct GameConfig
 {
@@ -21,10 +22,12 @@ struct GameConfig
 class GameManager
 {
 public:
-    GameManager(const GameConfig& config);
+    GameManager(const GameConfig& config, Scenario* scenario);
     ~GameManager();
 
     void SetNumberOfPlayers(unsigned int numberOfPlayers) {m_numberOfPlayers = numberOfPlayers;}
+    void SpawnVehicle();
+    void UnspawnVehicle(unsigned int id);
 
     int Run();
 
@@ -39,10 +42,11 @@ private:
 
     b2World* m_world = nullptr;
     Track* m_track;
-    std::vector<Car*> m_cars;
+    std::unordered_map<unsigned int, Car*> m_cars;
     unsigned int m_numberOfPlayers = 0;
 
     float m_elapsedTime = 0.0f;
     unsigned int m_nbFrames = 0;
     GameConfig m_config;
+    Scenario* m_scenario = nullptr;
 };

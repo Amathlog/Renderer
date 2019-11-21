@@ -26,8 +26,8 @@ class Car;
 // Precompute indexes and distances, for better performances
 struct SamplingIndexes
 {
-    constexpr static inline size_t SAMPLING_INDEXES_SIZE = 4;
-    constexpr static inline std::array<float, SAMPLING_INDEXES_SIZE> SAMPLING_DISTANCES = { 3.0f, 5.0f, 10.0f, 25.0f };
+    constexpr static inline size_t SAMPLING_INDEXES_SIZE = 5;
+    constexpr static inline std::array<float, SAMPLING_INDEXES_SIZE> SAMPLING_DISTANCES = { 3.0f, 5.0f, 10.0f, 25.0f, 50.0f };
 
     constexpr SamplingIndexes() : precomputedDistances(), precomputedIndexes()
     {
