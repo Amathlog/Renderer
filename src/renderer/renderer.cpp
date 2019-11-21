@@ -125,6 +125,12 @@ void Renderer::ProcessInput()
     if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, -factor, 0.0f));
 
+    if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
+        m_camera.Zoom(factor);
+
+    if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
+        m_camera.Zoom(-factor);
+
 }
 
 bool Renderer::RequestedClose()

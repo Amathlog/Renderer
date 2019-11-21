@@ -14,6 +14,7 @@
 #include <chrono> 
 #include <thread>
 #include <GLFW/glfw3.h>
+#include <debugManager/debugManager.h>
 
 #define PROFILING
 
@@ -45,6 +46,8 @@ void GameManager::Initialize()
 
     m_world = new b2World(b2Vec2(0.0f, 0.0f));
     m_track = new Track();
+
+    DebugManager::GetInstance()->Enable(true);
 }
 
 void GameManager::ClearCars()
@@ -124,6 +127,12 @@ void GameManager::Step(float dt)
 
     m_world->Step(dt, 6*30, 2*30);
 
+    glm::vec2 p1 = m_track->GetPath()[0];
+    glm::vec2 p2 = m_track->GetPath()[20];
+
+    DebugManager::GetInstance()->DrawLine("track", glm::vec3(p1.x, p1.y, 0.0f), glm::vec3(p2.x, p2.y, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    //DebugManager::GetInstance()->DrawLine("track", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
     if (m_config.attachCamera)
         UpdateCamera();
 
@@ -152,9 +161,9 @@ int GameManager::Run()
     Camera::OrthographicParams& params = camera.GetOrthographicParams();
     // Setup differently if we are attached or not to a car
     if (m_config.attachCamera)
-        params = { -30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 10.0f };
+        params = { -30.0f, 30.0f, -30.0f, 30.0f, -0.1f, 10.0f };
     else
-        params = { -200.0f, 200.0f, -200.0f, 200.0f, 0.1f, 10.0f };
+        params = { -200.0f, 200.0f, -200.0f, 200.0f, -0.1f, 10.0f };
 
     int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / m_config.fps));
     float dt = 1.0f / m_config.fps;
@@ -188,6 +197,7 @@ int GameManager::Run()
 
         if (m_config.enableRendering)
         {
+            DebugManager::GetInstance()->Update();
             renderer->ProcessInput();
             renderer->Render();
         }
