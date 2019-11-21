@@ -45,13 +45,6 @@ Car::~Car()
         }
         m_world->DestroyBody(m_hull);
     }
-
-    // Controller
-    if (m_controller != nullptr)
-    {
-        delete m_controller;
-        m_controller = nullptr;
-    }
 }
 
 void Car::InitializePhysics()

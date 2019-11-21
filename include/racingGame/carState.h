@@ -56,13 +56,15 @@ struct CarState
     constexpr static inline float MAX_OMEGA = 40.0f;
     constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 2 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
 
-    float distanceFromRoad;
+    CarState() = default;
+
+    float distanceFromRoad = 0.0f;
     std::array<float, 2> carVelocityRoadRef;
-    float angleWithRoad;
+    float angleWithRoad = 0.0f;
     std::array<float, 2> wheelAngles;
     std::array<float, 4> wheelOmegas;
-    float carOmega;
-    float driftAngle;
+    float carOmega = 0.0f;
+    float driftAngle = 0.0f;
     std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherCarRef;
     std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherRoadRef;
 

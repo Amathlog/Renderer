@@ -30,13 +30,13 @@ public:
     void UnspawnVehicle(unsigned int id);
 
     int Run();
+    void Reset();
 
 private:
     void Initialize();
 
     void Step(float dt);
 
-    void Reset();
     void ClearCars();
     void UpdateCamera();
 

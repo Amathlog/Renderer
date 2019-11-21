@@ -36,6 +36,7 @@ public:
     void Step(float dt);
 
     void AttachController(CarController* controller) { m_controller = controller; }
+    void DettachController() { m_controller = nullptr; }
     CarController* GetController() { return m_controller; }
 
     void UpdateRendering();

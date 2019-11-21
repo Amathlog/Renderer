@@ -59,7 +59,7 @@ void GameManager::ClearCars()
     for (auto it : m_cars)
     {
         if (m_scenario != nullptr)
-            m_scenario->OnVehicleUnspawned(it.second->GetId());
+            m_scenario->OnVehicleUnspawned(it.second);
         delete it.second;
     }
     m_cars.clear();
@@ -76,10 +76,6 @@ void GameManager::Reset()
     ClearCars();
     m_track->ClearTrack();
     while(!m_track->GenerateTrack());
-    for (unsigned int i = 0; i < m_numberOfPlayers; ++i)
-    {
-        SpawnVehicle();
-    }
 }
 
 void GameManager::UpdateCamera()
@@ -105,6 +101,12 @@ void GameManager::UpdateCamera()
 
 void GameManager::Step(float dt) 
 {
+    // No scenario, nothing to do...
+    if (m_scenario == nullptr)
+        return;
+
+    m_scenario->Update(*this);
+
     bool shouldReset = false;
     unsigned int i = 0;
     for (auto it : m_cars)
@@ -163,7 +165,7 @@ void GameManager::UnspawnVehicle(unsigned int id)
     if (it != m_cars.end())
     {
         if (m_scenario != nullptr)
-            m_scenario->OnVehicleUnspawned(it->second->GetId());
+            m_scenario->OnVehicleUnspawned(it->second);
         delete it->second;
     }
     m_cars.erase(it);
