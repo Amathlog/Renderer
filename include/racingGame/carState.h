@@ -63,10 +63,10 @@ struct CarState
     std::array<float, 4> wheelOmegas;
     float carOmega;
     float driftAngle;
-    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurtherCarRef;
-    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurtherRoadRef;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherCarRef;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherRoadRef;
 
-    static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex);
+    static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo = false, unsigned int carId = 0);
 
     std::string ToString();
 };

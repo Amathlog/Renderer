@@ -14,6 +14,7 @@ struct GameConfig
     unsigned int fps            = 60;
     bool humanPlay              = true;
     bool attachCamera           = true;
+    bool debugInfo              = false;
     // TODO: Add AI config
 };
 

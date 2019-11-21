@@ -5,13 +5,14 @@
 
 #include <cmath>
 #include <sstream>
+#include <debugManager/debugManager.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265359f
 #endif
 
 
-CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex)
+CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo, unsigned int carId)
 {
     CarState state;
 
@@ -103,16 +104,45 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
         glm::vec2 wantedPoint = firstPoint + distance * dir;
 
         // Compute in car reference
+        float lengthVec = glm::length(wantedPoint - carPosition);
         glm::vec2 wantedDir = Utils::NormalizeWithEpsilon(wantedPoint - carPosition);
 
-        state.pointsFurtherCarRef[2 * i] = glm::dot(wantedDir, carForward);
-        state.pointsFurtherCarRef[2 * i + 1] = glm::dot(wantedDir, carSide);
+        state.pointsFurtherCarRef[3 * i] = glm::dot(wantedDir, carForward);
+        state.pointsFurtherCarRef[3 * i + 1] = glm::dot(wantedDir, carSide);
+        state.pointsFurtherCarRef[3 * i + 2] = lengthVec;
 
         // Compute in road reference
         wantedDir = Utils::NormalizeWithEpsilon(wantedPoint - projectionOnRoad);
 
-        state.pointsFurtherRoadRef[2 * i] = glm::dot(wantedDir, roadDirection);
-        state.pointsFurtherRoadRef[2 * i + 1] = glm::dot(wantedDir, roadSide);
+        state.pointsFurtherRoadRef[3 * i] = glm::dot(wantedDir, roadDirection);
+        state.pointsFurtherRoadRef[3 * i + 1] = glm::dot(wantedDir, roadSide);
+        state.pointsFurtherRoadRef[3 * i + 2] = lengthVec;
+    }
+
+    if (addDebugInfo)
+    {
+        DebugManager* debugManager = DebugManager::GetInstance();
+        constexpr unsigned int frametime = 5;
+        debugManager->DrawLine("distance_" + carId, carPosition, projectionOnRoad, Colors::BLUE, frametime);
+
+        std::array<Colors, SamplingIndexes::SAMPLING_INDEXES_SIZE> colors = {
+            Colors::RED,
+            Colors::YELLOW,
+            Colors::CYAN,
+            Colors::BLACK
+        };
+
+        for (unsigned int i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)
+        {
+            char buffer1[50];
+            char buffer2[50];
+            sprintf_s(buffer1, "offsetv_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
+            sprintf_s(buffer2, "offseth_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
+            glm::vec2 firstPoint = carPosition + carForward * state.pointsFurtherCarRef[3 * i] * state.pointsFurtherCarRef[3 * i + 2];
+            glm::vec2 secondPoint = firstPoint + carSide * state.pointsFurtherCarRef[3 * i + 1] * state.pointsFurtherCarRef[3 * i + 2];
+            debugManager->DrawLine(buffer1, carPosition, firstPoint, colors[i], frametime);
+            debugManager->DrawLine(buffer2, firstPoint, secondPoint, colors[i], frametime);
+        }
     }
 
     return state;

@@ -15,6 +15,7 @@
 #include <thread>
 #include <GLFW/glfw3.h>
 #include <debugManager/debugManager.h>
+#include <utils/utils.h>
 
 #define PROFILING
 
@@ -104,6 +105,7 @@ void GameManager::UpdateCamera()
 void GameManager::Step(float dt) 
 {
     bool shouldReset = false;
+    unsigned int i = 0;
     for (Car* car : m_cars)
     {
         // Check if the car is out
@@ -115,10 +117,12 @@ void GameManager::Step(float dt)
             break;
         }
         
+        car->UpdateTrackIndex(m_track->GetPath());
         CarController* controller = car->GetController();
         if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
         {
-            controller->Update(CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex()), *car);
+            CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i);
+            controller->Update(state, *car);
         }
 
         car->Step(dt);
