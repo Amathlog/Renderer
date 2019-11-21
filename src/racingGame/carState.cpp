@@ -139,8 +139,8 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
             char buffer2[50];
             sprintf_s(buffer1, "offsetv_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
             sprintf_s(buffer2, "offseth_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
-            glm::vec2 firstPoint = carPosition + carForward * state.pointsFurtherCarRef[3 * i] * state.pointsFurtherCarRef[3 * i + 2];
-            glm::vec2 secondPoint = firstPoint + carSide * state.pointsFurtherCarRef[3 * i + 1] * state.pointsFurtherCarRef[3 * i + 2];
+            firstPoint = carPosition + carForward * state.pointsFurtherCarRef[3 * i] * state.pointsFurtherCarRef[3 * i + 2];
+            secondPoint = firstPoint + carSide * state.pointsFurtherCarRef[3 * i + 1] * state.pointsFurtherCarRef[3 * i + 2];
             debugManager->DrawLine(buffer1, carPosition, firstPoint, colors[i], frametime);
             debugManager->DrawLine(buffer2, firstPoint, secondPoint, colors[i], frametime);
         }
