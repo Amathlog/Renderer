@@ -25,7 +25,7 @@ void DebugManager::Enable(bool enable)
     if (m_enabled && !enable)
         Clear();
 
-    m_enabled = enable;
+    m_enabled = enable && Renderer::GetInstance()->IsEnabled();
 }
 
 void DebugManager::Clear()
