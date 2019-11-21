@@ -31,6 +31,7 @@ Line::Line(const glm::vec3& p1, const glm::vec3& p2, const glm::vec4& color)
 Line::~Line()
 {
     glDeleteBuffers(1, &m_VBO);
+    glDeleteVertexArrays(1, &m_VAO);
 }
 
 void Line::CreateShader()
