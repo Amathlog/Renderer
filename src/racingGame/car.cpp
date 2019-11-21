@@ -181,8 +181,8 @@ void Car::UpdateRendering()
         return;
     
     glm::vec2 pos = GetPosition();
-    pos[0] /= Constants::SCALE_CAR;
-    pos[1] /= Constants::SCALE_CAR;
+    // pos[0] /= Constants::SCALE_CAR;
+    // pos[1] /= Constants::SCALE_CAR;
     m_hullPolygon->GetPosition() = glm::vec3(pos.x, pos.y, 0.0f);
     m_hullPolygon->GetRotation()[2] = GetAngle();
 

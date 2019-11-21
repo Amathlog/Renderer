@@ -86,19 +86,19 @@ void DebugManager::DrawLine(const std::string& id, const glm::vec3& p1, const gl
         polygon->GetColor() = color;
     }
 
-    //polygon->GetPosition() = p1;
+    polygon->GetPosition() = p1;
 
     glm::vec3 line = p2 - p1;
-    //polygon->GetScale()[1] = glm::length(line) / length;
-    polygon->GetScale()[1] = 10.0f;
+    polygon->GetScale()[1] = glm::length(line) / length;
+    //polygon->GetScale()[1] = 10.0f;
     glm::vec3& rotation = polygon->GetRotation();
     Utils::NormalizeWithEpsilonOnPlace(line);
 
     // Compute rotation matrix
     // https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
     glm::vec3 startVec(0.0f, 1.0f, 0.0f);
-    glm::vec3 v = glm::cross(startVec, line);
-    float cosine = glm::dot(startVec, line);
+    glm::vec3 v = glm::cross(line, startVec);
+    float cosine = glm::dot(line, startVec);
 
     if (cosine == -1.0f)
     {

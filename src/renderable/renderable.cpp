@@ -37,11 +37,11 @@ void Renderable::Draw(const glm::mat4& mvp) const{
 glm::mat4 Renderable::GetTransform() const
 {
     glm::mat4 transform(1.0f);
-    transform = glm::scale(transform, m_scale);
     transform = glm::translate(transform, m_position);
-    transform = glm::rotate(transform, m_rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
-    transform = glm::rotate(transform, m_rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
     transform = glm::rotate(transform, m_rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+    transform = glm::rotate(transform, m_rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+    transform = glm::rotate(transform, m_rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+    transform = glm::scale(transform, m_scale);
     return transform;
 }
 
