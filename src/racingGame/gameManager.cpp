@@ -52,6 +52,9 @@ void GameManager::Initialize()
     m_track = new Track();
 
     DebugManager::GetInstance()->Enable(true);
+
+    if (m_scenario != nullptr)
+        m_scenario->Initialize();
 }
 
 void GameManager::ClearCars()

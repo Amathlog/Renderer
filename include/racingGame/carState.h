@@ -54,7 +54,7 @@ struct CarState
 {
     constexpr static inline float MAX_SPEED = 40.0f;
     constexpr static inline float MAX_OMEGA = 40.0f;
-    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 2 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
+    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 3 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
 
     CarState() = default;
 
