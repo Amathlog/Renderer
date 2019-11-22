@@ -322,3 +322,28 @@ void Car::UpdateTrackIndex(const Track::Path& path)
     }
     m_currentTrackIndex = closestIndex;
 }
+
+void Car::EnableCollision(bool enable)
+{
+    if (m_hull == nullptr)
+        return;
+
+    // Disable for hull
+    b2Fixture* hullFixtures = m_hull->GetFixtureList();
+    while (hullFixtures != nullptr)
+    {
+        hullFixtures->SetSensor(!enable);
+        hullFixtures = hullFixtures->GetNext();
+    }
+
+    // Then do the same for all the wheels
+    for (auto& wheel : m_wheels)
+    {
+        b2Fixture* wheelFixtures = wheel.body->GetFixtureList();
+        while (wheelFixtures != nullptr)
+        {
+            wheelFixtures->SetSensor(!enable);
+            wheelFixtures = wheelFixtures->GetNext();
+        }
+    }
+}
