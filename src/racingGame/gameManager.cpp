@@ -1,16 +1,16 @@
-#include "racingGame/gameManager.h"
+#include <racingGame/gameManager.h>
 
-#include "glm/glm.hpp"
-#include "Box2D/Box2D.h"
-#include "racingGame/car.h"
-#include "racingGame/track.h"
+#include <glm/glm.hpp>
+#include <Box2D/Box2D.h>
+#include <racingGame/car.h>
+#include <racingGame/track.h>
 
-#include "renderer/renderer.h"
-#include "renderer/camera.h"
-#include "racingGame/constants.h"
-#include "racingGame/carState.h"
-#include "racingGame/controllers/humanCarController.h"
-#include "racingGame/scenarios/scenario.h"
+#include <renderer/renderer.h>
+#include <renderer/camera.h>
+#include <racingGame/constants.h>
+#include <racingGame/carState.h>
+#include <racingGame/controllers/humanCarController.h>
+#include <racingGame/scenarios/scenario.h>
 
 #include <iostream>
 #include <chrono> 
@@ -43,10 +43,11 @@ GameManager::~GameManager()
     }
 }
 
-void GameManager::Initialize()
+int GameManager::Initialize()
 {
+    // Nothing to do
     if (m_world != nullptr)
-        return;
+        return 0;
 
     m_world = new b2World(b2Vec2(0.0f, 0.0f));
     m_track = new Track();
@@ -54,7 +55,8 @@ void GameManager::Initialize()
     DebugManager::GetInstance()->Enable(true);
 
     if (m_scenario != nullptr)
-        m_scenario->Initialize();
+        return m_scenario->Initialize();
+    return 0;
 }
 
 void GameManager::ClearCars()
@@ -200,7 +202,9 @@ int GameManager::Run()
     float dt = 1.0f / m_config.fps;
 
     // Then initialize the game
-    Initialize();
+    errorCode = Initialize();
+    if (errorCode != 0)
+        return errorCode;
     // CHANGE WITH AI CONTROLLERS
     SetNumberOfPlayers(m_config.humanPlay ? 1 : 1);
     Reset();

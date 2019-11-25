@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "shaders/shaders.h"
+#include <shaders/shaders.h>
 #include <iostream>
 #include <unordered_map>
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 #include <vector>
 #include <list>
-#include "racingGame/track.h"
+#include <racingGame/track.h>
 
 class b2Body;
 class b2World;
@@ -36,7 +36,7 @@ public:
     void Step(float dt);
 
     void AttachController(CarController* controller) { m_controller = controller; }
-    void DettachController() { m_controller = nullptr; }
+    void DetachController() { m_controller = nullptr; }
     CarController* GetController() { return m_controller; }
 
     void UpdateRendering();

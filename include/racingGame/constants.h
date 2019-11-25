@@ -11,7 +11,7 @@ namespace Constants
     constexpr float LAYER_WHEELS = 0.4f;
     constexpr float SCALE_CAR = 0.02f;
 
-    constexpr std::initializer_list<float> HULL_VERTRICES = {
+    constexpr std::initializer_list<float> HULL_VERTICES = {
         // HULL_1
         60.0f, 130.0f, LAYER_CAR_Z,
         -60.0f, 130.0f, LAYER_CAR_Z,
@@ -63,7 +63,7 @@ namespace Constants
     constexpr float WHEEL_R = 27.0f;
     constexpr float WHEEL_W = 14.0f;
 
-    constexpr std::initializer_list<float> WHEEL_VERTRICES = {
+    constexpr std::initializer_list<float> WHEEL_VERTICES = {
         WHEEL_W, WHEEL_R, LAYER_WHEELS,
         -WHEEL_W, WHEEL_R, LAYER_WHEELS,
         -WHEEL_W, -WHEEL_R, LAYER_WHEELS,

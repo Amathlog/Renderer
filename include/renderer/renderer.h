@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include "renderer/camera.h"
+#include <renderer/camera.h>
 #include <functional>
 #include <unordered_map>
 

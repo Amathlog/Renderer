@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "shaders/shaders.h"
+#include <shaders/shaders.h>
 
 class ShaderManager
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "glm/glm.hpp"
-#include "renderable/renderable.h"
+#include <glm/glm.hpp>
+#include <renderable/renderable.h>
 #include <string>
 #include <unordered_map>
 #include <utils/colors.h>

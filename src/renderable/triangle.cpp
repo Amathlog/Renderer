@@ -1,6 +1,6 @@
-#include "renderable/triangle.h"
-#include "renderer/camera.h"
-#include "shaders/shaders.h"
+#include <renderable/triangle.h>
+#include <renderer/camera.h>
+#include <shaders/shaders.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

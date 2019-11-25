@@ -1,4 +1,4 @@
-#include "shaders/shaderManager.h"
+#include <shaders/shaderManager.h>
 
 Shader* ShaderManager::LoadShader(const char* vertexShaderName, const char* fragmentShaderName)
 {

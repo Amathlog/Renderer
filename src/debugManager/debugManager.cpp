@@ -1,6 +1,6 @@
-#include "debugManager/debugManager.h"
-#include "renderer/renderer.h"
-#include "renderable/polygon.h"
+#include <debugManager/debugManager.h>
+#include <renderer/renderer.h>
+#include <renderable/polygon.h>
 #include <utils/utils.h>
 #include <renderable/line.h>
 

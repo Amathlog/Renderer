@@ -1,4 +1,4 @@
-#include "racingGame/scenarios/humanSinglePlayerScenario.h"
+#include <racingGame/scenarios/humanSinglePlayerScenario.h>
 #include <racingGame/controllers/humanCarController.h>
 #include <racingGame/car.h>
 #include <racingGame/gameManager.h>
@@ -11,7 +11,7 @@ void HumanSinglePlayerScenario::OnVehicleSpawned(Car* car)
 
 void HumanSinglePlayerScenario::OnVehicleUnspawned(Car* car)
 {
-    car->DettachController();
+    car->DetachController();
     delete m_currentController;
     m_currentController = nullptr;
 }

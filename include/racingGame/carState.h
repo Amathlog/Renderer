@@ -2,8 +2,8 @@
 
 #include <array>
 #include <string>
-#include "racingGame/track.h"
-#include "racingGame/constants.h"
+#include <racingGame/track.h>
+#include <racingGame/constants.h>
 
 
 /// Description of a car state

@@ -1,8 +1,8 @@
-#include "renderable/polygon.h"
-#include "renderer/camera.h"
-#include "shaders/shaders.h"
-#include "shaders/shaderManager.h"
-#include "renderer/renderer.h"
+#include <renderable/polygon.h>
+#include <renderer/camera.h>
+#include <shaders/shaders.h>
+#include <shaders/shaderManager.h>
+#include <renderer/renderer.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -13,7 +13,7 @@
 #include <iostream>
 #include <filesystem>
 
-Polygon::Polygon(const std::vector<float>& vertrices, 
+Polygon::Polygon(const std::vector<float>& vertices, 
                  const std::vector<unsigned int>& indexes, 
                  const glm::vec4& color,
                  Shader* specificShader)
@@ -24,7 +24,7 @@ Polygon::Polygon(const std::vector<float>& vertrices,
     else
         CreateShader();
 
-    m_nbVertrices = (unsigned int)indexes.size();
+    m_nbVertices = (unsigned int)indexes.size();
     m_color = color;
 
     glGenVertexArrays(1, &m_VAO); 
@@ -34,7 +34,7 @@ Polygon::Polygon(const std::vector<float>& vertrices,
     glBindVertexArray(m_VAO);
  
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertrices.size() * sizeof(float), vertrices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(unsigned int), indexes.data(), GL_STATIC_DRAW);
@@ -71,7 +71,7 @@ void Polygon::InternalDraw(const glm::mat4& mvp) const
     m_shader->SetVec4("ourColor", m_color);
 
     glBindVertexArray(m_VAO);
-    glDrawElements(GL_TRIANGLES, m_nbVertrices, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, m_nbVertices, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     m_shader->Disable();

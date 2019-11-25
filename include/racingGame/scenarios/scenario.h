@@ -7,7 +7,7 @@ class Scenario
 {
 public:
     // Function called at the beginning of each frame.
-    virtual void Initialize() {}
+    virtual int Initialize() { return 0; }
     virtual void Update(GameManager&) {}
     virtual void OnVehicleSpawned(Car*) {}
     virtual void OnVehicleUnspawned(Car*) {}

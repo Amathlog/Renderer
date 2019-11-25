@@ -1,12 +1,12 @@
 #pragma once
 
-#include "renderable/renderable.h"
+#include <renderable/renderable.h>
 #include <vector>
 
 class Triangle : public Renderable
 {
 public:
-    // Data is 3 vertrices and 3 colors
+    // Data is 3 vertices and 3 colors
     // v1 c1 v2 c2 v3 c3 => 18 floats
     Triangle(const std::vector<float>& data);
     virtual ~Triangle();

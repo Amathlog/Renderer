@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderable/renderable.h"
-#include "glm/glm.hpp"
+#include <renderable/renderable.h>
+#include <glm/glm.hpp>
 
 class Line : public Renderable
 {

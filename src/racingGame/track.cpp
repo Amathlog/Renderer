@@ -1,10 +1,11 @@
 // Work initially done by Oleg Klimov. Adapted by Adrien Logut
 
-#include "racingGame/track.h"
-#include "racingGame/constants.h"
-#include "renderable/polygon.h"
-#include "renderer/renderer.h"
-#include "shaders/shaderManager.h"
+#include <racingGame/track.h>
+#include <racingGame/constants.h>
+#include <renderable/polygon.h>
+#include <renderer/renderer.h>
+#include <shaders/shaderManager.h>
+#include <utils/randomEngine.h>
 
 #include <cmath>
 #include <random>
@@ -21,16 +22,14 @@
 
 bool Track::GenerateTrack()
 {
-    std::default_random_engine random_engine;
-    unsigned int randomSeed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-    random_engine.seed(randomSeed);
+    std::default_random_engine& randomEngine = RandomEngine::GetGenerator();
     std::vector<glm::vec3> checkpoints;
     float startAlpha = -M_PI / Constants::CHECKPOINTS;
     std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
     for (unsigned int i = 0; i < Constants::CHECKPOINTS; ++i)
     {
-        float alpha = 2.0f * M_PI / Constants::CHECKPOINTS * (i + distribution(random_engine));
-        float rad = Constants::TRACK_RAD * (distribution(random_engine) * 0.66f + 0.33f);
+        float alpha = 2.0f * M_PI / Constants::CHECKPOINTS * (i + distribution(randomEngine));
+        float rad = Constants::TRACK_RAD * (distribution(randomEngine) * 0.66f + 0.33f);
         if (i == 0)
         {
             alpha = 0.0f;
@@ -188,12 +187,12 @@ bool Track::GenerateTrack()
     glm::vec4 roadColor(Constants::ROAD_COLOR[0], Constants::ROAD_COLOR[1], Constants::ROAD_COLOR[2], 1.0f);
     Renderer* renderer = Renderer::GetInstance();
     // Road data
-    std::vector<float> roadVertrices;
+    std::vector<float> roadVertices;
     std::vector<unsigned int> roadIndexes;
     // Border data
-    std::vector<float> whiteBorderVertrices;
+    std::vector<float> whiteBorderVertices;
     std::vector<unsigned int> whiteBorderIndexes;
-    std::vector<float> redBorderVertrices;
+    std::vector<float> redBorderVertices;
     std::vector<unsigned int> redBorderIndexes;
     // Generate our polygons
     for(unsigned int i = 0; i < track.size(); ++i)
@@ -201,7 +200,7 @@ bool Track::GenerateTrack()
         const glm::vec4 p1 = track[i];
         const glm::vec4 p2 = track[(i + 1) % track.size()];
 
-        roadVertrices.insert(roadVertrices.end(), {
+        roadVertices.insert(roadVertices.end(), {
             p1[2] - Constants::TRACK_WIDTH * std::cos(p1[1]),
             p1[3] - Constants::TRACK_WIDTH * std::sin(p1[1]),
             Constants::LAYER_TRACK_Z,
@@ -230,10 +229,10 @@ bool Track::GenerateTrack()
         if (borders[i])
         {
             float side = std::signbit(p1[1] - p2[1]) ? -1.0f : 1.0f;
-            std::vector<float>& vertricesToFill = i % 2 == 0 ? whiteBorderVertrices : redBorderVertrices;
+            std::vector<float>& verticesToFill = i % 2 == 0 ? whiteBorderVertices : redBorderVertices;
             std::vector<unsigned int>& indexesToFill = i % 2 == 0 ? whiteBorderIndexes : redBorderIndexes;
 
-            vertricesToFill.insert(vertricesToFill.end(),
+            verticesToFill.insert(verticesToFill.end(),
                 {
                 p1[2] + side * Constants::TRACK_WIDTH * std::cos(p1[1]),
                 p1[3] + side * Constants::TRACK_WIDTH * std::sin(p1[1]),
@@ -253,7 +252,7 @@ bool Track::GenerateTrack()
                 }
             );
 
-            index = (unsigned int)vertricesToFill.size() / 3 - 4;
+            index = (unsigned int)verticesToFill.size() / 3 - 4;
             indexesToFill.insert(indexesToFill.end(),
                 {
                     index, index + 1, index + 2,
@@ -266,11 +265,11 @@ bool Track::GenerateTrack()
     // Then create the polygons. For the track, use a specific shader
     Shader* trackShader = ShaderManager::GetInstance()->LoadShader("track_shader.vs", "track_shader.fs");
 
-    m_tilesPolygon = new Polygon(roadVertrices, roadIndexes, roadColor, trackShader);
+    m_tilesPolygon = new Polygon(roadVertices, roadIndexes, roadColor, trackShader);
     renderer->AddRenderable(m_tilesPolygon);
 
-    m_bordersPolygon.push_back(new Polygon(whiteBorderVertrices, whiteBorderIndexes, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    m_bordersPolygon.push_back(new Polygon(redBorderVertrices, redBorderIndexes, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+    m_bordersPolygon.push_back(new Polygon(whiteBorderVertices, whiteBorderIndexes, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    m_bordersPolygon.push_back(new Polygon(redBorderVertices, redBorderIndexes, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 
     renderer->AddRenderable(m_bordersPolygon[0]);
     renderer->AddRenderable(m_bordersPolygon[1]);
@@ -309,7 +308,7 @@ Track::Track()
         return;
 
     // Generate the background
-    std::vector<float> backgroundVertrices = {
+    std::vector<float> backgroundVertices = {
         -Constants::PLAYFIELD, Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
         Constants::PLAYFIELD, Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
         Constants::PLAYFIELD, -Constants::PLAYFIELD, Constants::LAYER_BACKGROUND_Z,
@@ -318,21 +317,21 @@ Track::Track()
 
     std::vector<unsigned int> backgroundIndexes = {0, 1, 2, 0, 2, 3};
     glm::vec4 color(Constants::BACKGROUND_COLOR1[0], Constants::BACKGROUND_COLOR1[1], Constants::BACKGROUND_COLOR1[2], 1.0f);
-    Polygon* background = new Polygon(backgroundVertrices, backgroundIndexes, color);
+    Polygon* background = new Polygon(backgroundVertices, backgroundIndexes, color);
     renderer->AddRenderable(background);
     m_backgroundSquares.push_back(background);
 
     // Then add the little squares
     int nbSquares = 20;
     float k = Constants::PLAYFIELD / nbSquares;
-    std::vector<float> squareVertrices;
+    std::vector<float> squareVertices;
     std::vector<unsigned int> squareIndexes;
     unsigned int currentIndex = 0;
     for (int i = -nbSquares; i < nbSquares; i += 2)
     {
         for (int j = -nbSquares; j < nbSquares; j+= 2)
         {
-                squareVertrices.insert(squareVertrices.end(), {
+                squareVertices.insert(squareVertices.end(), {
                     k * i, k * (j + 1), Constants::LAYER_BACKGROUND_Z - 0.01f,
                     k * (i + 1), k * (j + 1), Constants::LAYER_BACKGROUND_Z - 0.01f,
                     k * (i + 1), k * j, Constants::LAYER_BACKGROUND_Z - 0.01f,
@@ -346,7 +345,7 @@ Track::Track()
         }
     }
     glm::vec4 colorSquare(Constants::BACKGROUND_COLOR2[0], Constants::BACKGROUND_COLOR2[1], Constants::BACKGROUND_COLOR2[2], 1.0f);
-    Polygon* square = new Polygon(squareVertrices, squareIndexes, colorSquare);
+    Polygon* square = new Polygon(squareVertices, squareIndexes, colorSquare);
     renderer->AddRenderable(square);
     m_backgroundSquares.push_back(square);
 }

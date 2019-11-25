@@ -1,16 +1,17 @@
-#include "racingGame/car.h"
-#include "racingGame/constants.h"
-#include "racingGame/controllers/carController.h"
-#include "renderer/renderer.h"
-#include "renderable/polygon.h"
-#include "Box2D/Box2D.h"
+#include <racingGame/car.h>
+#include <racingGame/constants.h>
+#include <racingGame/controllers/carController.h>
+#include <renderer/renderer.h>
+#include <renderable/polygon.h>
+#include <Box2D/Box2D.h>
+#include <atomic>
 
 
 Car::Car(b2World* world, const glm::vec4& color)
     : m_world(world)
     , m_hullColor(color)
 {
-    static unsigned int IDS = 1;
+    static std::atomic<unsigned int> IDS = 1;
     m_id = IDS++;
     InitializePhysics();
     InitializeRendering();
@@ -30,7 +31,8 @@ Car::~Car()
         m_wheelsPolygon.clear();
 
         Renderer* renderer = Renderer::GetInstance();
-        renderer->RemoveRenderable(m_hullPolygon->GetId());
+        if (renderer != nullptr)
+            renderer->RemoveRenderable(m_hullPolygon->GetId());
         delete m_hullPolygon;
         m_hullPolygon = nullptr;
     }
@@ -56,7 +58,7 @@ void Car::InitializePhysics()
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
     m_hull = m_world->CreateBody(&bodyDef);
-    std::vector<float> vertrices(Constants::HULL_VERTRICES);
+    std::vector<float> vertices(Constants::HULL_VERTICES);
     std::vector<unsigned int> sizes = {4, 4, 9, 4};
     unsigned int i = 0;
     for(unsigned int size : sizes)
@@ -68,7 +70,7 @@ void Car::InitializePhysics()
             // Remove center point used for rendering
             if (size == 9 && j == i + size - 1)
                 continue;
-            polygon.push_back(b2Vec2(vertrices[3*j] * Constants::SCALE_CAR, vertrices[3*j + 1] * Constants::SCALE_CAR));
+            polygon.push_back(b2Vec2(vertices[3*j] * Constants::SCALE_CAR, vertices[3*j + 1] * Constants::SCALE_CAR));
         }
         shape.Set(polygon.data(), (int32)polygon.size());
         i += size;
@@ -77,7 +79,7 @@ void Car::InitializePhysics()
 
     // Then the wheels (and attached them to the hull)
     m_wheels.clear();
-    std::vector<float> vertricesWheel(Constants::WHEEL_VERTRICES);
+    std::vector<float> verticesWheel(Constants::WHEEL_VERTICES);
     b2PolygonShape wheelShape;
     wheelShape.SetAsBox(Constants::WHEEL_W * Constants::SCALE_CAR, Constants::WHEEL_R * Constants::SCALE_CAR);
     b2FixtureDef wheelFixture;
@@ -121,18 +123,18 @@ void Car::InitializeRendering()
         return;
 
     // First the hull
-    std::vector<float> vertrices(Constants::HULL_VERTRICES);
+    std::vector<float> vertices(Constants::HULL_VERTICES);
     std::vector<unsigned int> indexes(Constants::HULL_INDEXES);
-    m_hullPolygon = new Polygon(vertrices, indexes, m_hullColor);
+    m_hullPolygon = new Polygon(vertices, indexes, m_hullColor);
     m_hullPolygon->GetScale() = glm::vec3(Constants::SCALE_CAR, Constants::SCALE_CAR, 1.0f);
     Renderer::GetInstance()->AddRenderable(m_hullPolygon);
 
     // Then the wheels
     std::vector<unsigned int> indexesWheel = {0, 1, 2, 0, 2, 3};
     glm::vec4 wheelColor(Constants::WHEEL_COLOR[0], Constants::WHEEL_COLOR[1], Constants::WHEEL_COLOR[2], 1.0f);
-    std::vector<float> vertricesWheel(Constants::WHEEL_VERTRICES);
+    std::vector<float> verticesWheel(Constants::WHEEL_VERTICES);
     for(unsigned int i = 0; i < 4; ++i){
-        Polygon* wheel = new Polygon(vertricesWheel, indexesWheel, wheelColor);
+        Polygon* wheel = new Polygon(verticesWheel, indexesWheel, wheelColor);
         wheel->GetPosition() = glm::vec3(Constants::WHEELPOS[2 * i], Constants::WHEELPOS[2 * i + 1], 0.0f);
         m_hullPolygon->AddChild(wheel);
         m_wheelsPolygon.push_back(wheel);
@@ -224,7 +226,11 @@ void Car::Step(float dt)
         // Steer each wheel
         float val = wheel.steer - wheel.joint->GetJointAngle();
         float dir = std::signbit(val) ? -1.0f : 1.0f;
-        wheel.joint->SetMotorSpeed(dir * std::min(50.0f * std::abs(val), 3.0f));
+
+        // Magic number taken from Python implementation
+        constexpr float maxMotorValue = 3.0f;
+        float rescaleFactorMotorValue = 50.0f;
+        wheel.joint->SetMotorSpeed(dir * std::min(rescaleFactorMotorValue * std::abs(val), maxMotorValue));
 
 
         // # Position => friction_limit
@@ -266,9 +272,11 @@ void Car::Step(float dt)
         float pForce = -velocitySide;
 
         // Physically correct is to always apply friction_limit until speed is equal.
-        // But dt is finite, that will lead to oscillations if difference is already near zero.
-        fForce *= 205000.0f * Constants::SCALE_CAR * Constants::SCALE_CAR; // Random coefficient to cut oscillations in few steps (have no effect on friction_limit)
-        pForce *= 205000.0f * Constants::SCALE_CAR * Constants::SCALE_CAR;
+        // But dt is finite, that will lead to oscillations if difference is already near zero
+        // Use of a magic number, taken from the original implementation in Python.
+        constexpr float magicNumber = 205000.0f;
+        fForce *= magicNumber * Constants::SCALE_CAR * Constants::SCALE_CAR; // Random coefficient to cut oscillations in few steps (have no effect on friction_limit)
+        pForce *= magicNumber * Constants::SCALE_CAR * Constants::SCALE_CAR;
         float force = std::sqrt(std::pow(fForce, 2) + std::pow(pForce, 2));
 
         // Skid trace

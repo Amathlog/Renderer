@@ -1,6 +1,6 @@
 #pragma once
 
-#include "racingGame/scenarios/scenario.h"
+#include <racingGame/scenarios/scenario.h>
 
 class HumanCarController;
 

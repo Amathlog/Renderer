@@ -1,7 +1,7 @@
-#include "racingGame/controllers/humanCarController.h"
-#include "renderer/renderer.h"
-#include "racingGame/car.h"
-#include "GLFW/glfw3.h"
+#include <racingGame/controllers/humanCarController.h>
+#include <renderer/renderer.h>
+#include <racingGame/car.h>
+#include <GLFW/glfw3.h>
 
 HumanCarController::HumanCarController(unsigned int stateInterval)
     : CarController(stateInterval)

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#include <utils/randomEngine.h>
 
 enum class Colors : uint64_t
 {
@@ -159,5 +160,12 @@ namespace ColorsUtils
         float g = ((colorInt >> 8) % 256) / 255.0f;
         float r = ((colorInt >> 16) % 256) / 255.0f;
         return glm::vec4(r, g, b, alpha);
+    }
+
+    inline glm::vec4 GetRandomColor()
+    {
+        std::default_random_engine& randomEngine = RandomEngine::GetGenerator();
+        std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+        return glm::vec4(distribution(randomEngine), distribution(randomEngine), distribution(randomEngine), 1.0f);
     }
 }

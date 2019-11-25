@@ -1,12 +1,12 @@
-#include "renderer/renderer.h"
+#include <renderer/renderer.h>
 
 #include <iostream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "shaders/shaders.h"
-#include "renderable/renderable.h"
+#include <shaders/shaders.h>
+#include <renderable/renderable.h>
 
 namespace {
     void framebuffer_size_callback(GLFWwindow*, int width, int height)

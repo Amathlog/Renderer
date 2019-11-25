@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include "racingGame/gameManager.h"
+#include <racingGame/gameManager.h>
 #include <racingGame/scenarios/humanSinglePlayerScenario.h>
 
 int main(int argc, char** argv)

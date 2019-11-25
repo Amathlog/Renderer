@@ -1,10 +1,10 @@
-#include "renderable/renderable.h"
+#include <renderable/renderable.h>
 #include <vector>
 
 class Polygon : public Renderable
 {
 public:
-    Polygon(const std::vector<float>& vertrices, 
+    Polygon(const std::vector<float>& vertices, 
             const std::vector<unsigned int>& indexes, 
             const glm::vec4& color,
             Shader* specificShader = nullptr);
@@ -23,5 +23,5 @@ protected:
     unsigned int m_VAO;
     unsigned int m_EBO;
     glm::vec4 m_color;
-    unsigned int m_nbVertrices;
+    unsigned int m_nbVertices;
 };

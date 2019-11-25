@@ -33,7 +33,7 @@ public:
     void Reset();
 
 private:
-    void Initialize();
+    int Initialize();
 
     void Step(float dt);
 
