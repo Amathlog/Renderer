@@ -107,23 +107,18 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
         float lengthVec = glm::length(wantedPoint - carPosition);
         glm::vec2 wantedDir = Utils::NormalizeWithEpsilon(wantedPoint - carPosition);
 
-        state.pointsFurtherCarRef[3 * i] = glm::dot(wantedDir, carForward);
-        state.pointsFurtherCarRef[3 * i + 1] = glm::dot(wantedDir, carSide);
-        state.pointsFurtherCarRef[3 * i + 2] = lengthVec;
-
-        // Compute in road reference
-        wantedDir = Utils::NormalizeWithEpsilon(wantedPoint - projectionOnRoad);
-
-        state.pointsFurtherRoadRef[3 * i] = glm::dot(wantedDir, roadDirection);
-        state.pointsFurtherRoadRef[3 * i + 1] = glm::dot(wantedDir, roadSide);
-        state.pointsFurtherRoadRef[3 * i + 2] = lengthVec;
+        state.pointsFurther[2 * i] = glm::dot(wantedDir, carForward);
+        state.pointsFurther[2 * i + 1] = glm::dot(wantedDir, carSide);
+        state.debugPointsFurtherDistances[i] = lengthVec;
     }
 
     if (addDebugInfo)
     {
         DebugManager* debugManager = DebugManager::GetInstance();
         constexpr unsigned int frametime = 5;
-        debugManager->DrawLine("distance_" + carId, carPosition, projectionOnRoad, Colors::BLUE, frametime);
+        char buffer[50];
+        sprintf_s(buffer, "distance_%d", carId);
+        debugManager->DrawLine(buffer, carPosition, projectionOnRoad, Colors::BLUE, frametime);
 
         std::array<Colors, SamplingIndexes::SAMPLING_INDEXES_SIZE> colors = {
             Colors::RED,
@@ -139,14 +134,37 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
             char buffer2[50];
             sprintf_s(buffer1, "offsetv_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
             sprintf_s(buffer2, "offseth_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
-            firstPoint = carPosition + carForward * state.pointsFurtherCarRef[3 * i] * state.pointsFurtherCarRef[3 * i + 2];
-            secondPoint = firstPoint + carSide * state.pointsFurtherCarRef[3 * i + 1] * state.pointsFurtherCarRef[3 * i + 2];
+            firstPoint = carPosition + carForward * state.pointsFurther[2 * i] * state.debugPointsFurtherDistances[i];
+            secondPoint = firstPoint + carSide * state.pointsFurther[2 * i + 1] * state.debugPointsFurtherDistances[i];
             debugManager->DrawLine(buffer1, carPosition, firstPoint, colors[i], frametime);
             debugManager->DrawLine(buffer2, firstPoint, secondPoint, colors[i], frametime);
         }
     }
 
     return state;
+}
+
+void CarState::ExportToArray(std::array<float, STATE_SIZE>& outArray) const
+{
+    size_t size = 0;
+
+    // Utility function
+    auto copyToOutput = [&size, &outArray](auto& arrayToCopy)
+    {
+        std::copy(arrayToCopy.begin(), arrayToCopy.end(), outArray.begin() + size);
+        size += arrayToCopy.size();
+    };
+
+    outArray[size++] = distanceFromRoad;
+    copyToOutput(carVelocityRoadRef);
+    outArray[size++] = angleWithRoad;
+    copyToOutput(wheelAngles);
+    copyToOutput(wheelOmegas);
+    outArray[size++] = carOmega;
+    outArray[size++] = driftAngle;
+    copyToOutput(pointsFurther);
+
+    assert(size == STATE_SIZE);
 }
 
 std::string CarState::ToString()
@@ -159,12 +177,11 @@ std::string CarState::ToString()
     res << "Wheel omegas: (" << wheelOmegas[0] << ", " << wheelOmegas[1] << ", " << wheelOmegas[2] << ", " << wheelOmegas[3] << ")" << std::endl;
     res << "Car omega: " << carOmega << std::endl;
     res << "Drift angle: " << driftAngle << std::endl;
-    res << "Projections offsets: " << std::endl;
+    res << "Projections offsets (in car ref): " << std::endl;
     for (size_t i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)
     {
-        res << "    *" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m: car(" << pointsFurtherCarRef[2 * i] << ", " \
-            << pointsFurtherCarRef[2 * i + 1] << ") road(" << pointsFurtherRoadRef[2 * i] << ", " << pointsFurtherRoadRef[2 * i + 1] \
-            << ")" << std::endl;
+        res << "    *" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m: " << pointsFurther[2 * i] << ", " \
+            << pointsFurther[2 * i + 1] << std::endl;
     }
     return res.str();
 }

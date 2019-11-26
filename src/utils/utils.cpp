@@ -56,18 +56,26 @@ glm::vec2 Utils::GetSide(const glm::vec2& v)
     return glm::vec2(v.y, -v.x);
 }
 
-float Utils::GetAngle(const glm::vec2 v1, const glm::vec2 v2)
+float Utils::GetAngle(const glm::vec2& v1, const glm::vec2& v2)
 {
-    float dotProduct = glm::dot(v1, v2);
-    float sign = v1.x * v2.y - v1.y * v2.x; // Cross product
+    // First normalize vectors
+    auto _v1 = Utils::NormalizeWithEpsilon(v1);
+    auto _v2 = Utils::NormalizeWithEpsilon(v2);
+    // Safety clip to avoid getting outside [-1, 1]
+    float dotProduct = std::clamp(glm::dot(_v1, _v2), -1.0f, 1.0f);
+    float sign = _v1.x * _v2.y - _v1.y * _v2.x; // Cross product
     return std::signbit(sign) ? -std::acos(dotProduct) : std::acos(dotProduct);
 }
 
-float Utils::GetAngle(const glm::vec3 v1, const glm::vec3 v2)
+float Utils::GetAngle(const glm::vec3& v1, const glm::vec3& v2)
 {
-    float dotProduct = glm::dot(v1, v2);
-    glm::vec3 normal = glm::cross(v1, v2);
-    float sign = v1.x * v2.y - v1.y * v2.x; // Cross product
+    // First normalize vectors
+    auto _v1 = Utils::NormalizeWithEpsilon(v1);
+    auto _v2 = Utils::NormalizeWithEpsilon(v2);
+    // Safety clip to avoid getting outside [-1, 1]
+    float dotProduct = std::clamp(glm::dot(_v1, _v2), -1.0f, 1.0f);
+    glm::vec3 normal = glm::cross(_v1, _v2);
+    float sign = _v1.x * _v2.y - _v1.y * _v2.x; // Cross product
     return std::signbit(sign) ? -std::acos(dotProduct) : std::acos(dotProduct);
 }
 

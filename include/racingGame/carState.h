@@ -54,7 +54,7 @@ struct CarState
 {
     constexpr static inline float MAX_SPEED = 40.0f;
     constexpr static inline float MAX_OMEGA = 40.0f;
-    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 3 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
+    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 2 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
 
     CarState() = default;
 
@@ -65,10 +65,12 @@ struct CarState
     std::array<float, 4> wheelOmegas;
     float carOmega = 0.0f;
     float driftAngle = 0.0f;
-    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherCarRef;
-    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*3> pointsFurtherRoadRef;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurther;
+    std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE> debugPointsFurtherDistances;
 
     static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo = false, unsigned int carId = 0);
+
+    void ExportToArray(std::array<float, STATE_SIZE>& outArray) const;
 
     std::string ToString();
 };

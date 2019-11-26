@@ -12,8 +12,8 @@ namespace Utils
     glm::vec3 NormalizeWithEpsilon(const glm::vec3& v);
 
     glm::vec2 GetSide(const glm::vec2& v);
-    float GetAngle(const glm::vec2 v1, const glm::vec2 v2);
-    float GetAngle(const glm::vec3 v1, const glm::vec3 v2);
+    float GetAngle(const glm::vec2& v1, const glm::vec2& v2);
+    float GetAngle(const glm::vec3& v1, const glm::vec3& v2);
 
     glm::vec2 Convertb2Toglm(const b2Vec2& v);
 
