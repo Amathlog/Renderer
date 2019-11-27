@@ -18,6 +18,7 @@
 #include <GLFW/glfw3.h>
 #include <debugManager/debugManager.h>
 #include <utils/utils.h>
+#include <shaders/shaderManager.h>
 
 #define PROFILING
 
@@ -41,6 +42,7 @@ GameManager::~GameManager()
         delete m_track;
         m_track = nullptr;
     }
+    DestroySingletons();
 }
 
 int GameManager::Initialize()
@@ -102,6 +104,22 @@ void GameManager::UpdateCamera()
     cameraNewPos[2] = camera.GetPosition()[2];
     cameraNewPos += up * 10.0f;
     camera.SetPosition(cameraNewPos);
+}
+
+void GameManager::CreateSingletons()
+{
+    Renderer::CreateInstance();
+    DebugManager::CreateInstance();
+    RandomEngine::CreateInstance();
+    ShaderManager::CreateInstance();
+}
+
+void GameManager::DestroySingletons()
+{
+    ShaderManager::DestroyInstance();
+    RandomEngine::DestroyInstance();
+    DebugManager::DestroyInstance();
+    Renderer::DestroyInstance();
 }
 
 void GameManager::Step(float dt) 
@@ -178,6 +196,8 @@ void GameManager::UnspawnVehicle(unsigned int id)
 
 int GameManager::Run()
 {
+    CreateSingletons();
+
     // Initialize the renderer
     Renderer* renderer = Renderer::GetInstance();
     renderer->Enable(m_config.enableRendering);

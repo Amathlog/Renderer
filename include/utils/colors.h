@@ -164,7 +164,7 @@ namespace ColorsUtils
 
     inline glm::vec4 GetRandomColor()
     {
-        std::default_random_engine& randomEngine = RandomEngine::GetGenerator();
+        std::default_random_engine& randomEngine = RandomEngine::GetInstance()->GetGenerator();
         std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
         return glm::vec4(distribution(randomEngine), distribution(randomEngine), distribution(randomEngine), 1.0f);
     }

@@ -4,21 +4,15 @@
 #include <renderer/camera.h>
 #include <functional>
 #include <unordered_map>
+#include <utils/singleton.h>
 
 struct GLFWwindow;
 class Shader;
 class Renderable;
 
-class Renderer
+class Renderer : public Singleton<Renderer>
 {
 public:
-    static Renderer* GetInstance()
-    {
-        if (ms_instance == nullptr)
-            ms_instance = new Renderer();
-        return ms_instance;
-    }
-
     int Initialize(unsigned int width, unsigned int height);
     void Close();
 
@@ -29,6 +23,7 @@ public:
     GLFWwindow* GetWindow() {return m_window;}
     bool RequestedClose();
 
+    Renderer(Token) : Singleton() {}
     ~Renderer();
 
     void AddRenderable(const Renderable* renderable);
@@ -49,8 +44,6 @@ public:
     void ClearInputCallbacks() { m_inputCallbacks.clear(); }
 
 private:
-    Renderer() = default;
-    static inline Renderer* ms_instance = nullptr;
 
     GLFWwindow* m_window = nullptr;
 

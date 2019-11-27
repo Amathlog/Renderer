@@ -5,17 +5,13 @@
 #include <string>
 #include <unordered_map>
 #include <utils/colors.h>
+#include <utils/singleton.h>
 
-class DebugManager
+class DebugManager : public Singleton<DebugManager>
 {
 public:
-    static DebugManager* GetInstance()
-    {
-        if (ms_instance == nullptr)
-            ms_instance = new DebugManager();
-        return ms_instance;
-    }
 
+    DebugManager(Token) : Singleton() {}
     ~DebugManager()
     {
         Clear();
@@ -53,9 +49,6 @@ private:
         Renderable* renderable = nullptr;
         int frameTimeRemaining;
     };
-
-    DebugManager() = default;
-    static inline DebugManager* ms_instance = nullptr;
 
     bool m_enabled;
 

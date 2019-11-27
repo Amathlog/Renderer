@@ -40,6 +40,9 @@ private:
     void ClearCars();
     void UpdateCamera();
 
+    void CreateSingletons();
+    void DestroySingletons();
+
     b2World* m_world = nullptr;
     Track* m_track;
     std::unordered_map<unsigned int, Car*> m_cars;

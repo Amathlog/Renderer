@@ -22,7 +22,7 @@
 
 bool Track::GenerateTrack()
 {
-    std::default_random_engine& randomEngine = RandomEngine::GetGenerator();
+    std::default_random_engine& randomEngine = RandomEngine::GetInstance()->GetGenerator();
     std::vector<glm::vec3> checkpoints;
     float startAlpha = -M_PI / Constants::CHECKPOINTS;
     std::uniform_real_distribution<float> distribution(0.0f, 1.0f);

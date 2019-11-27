@@ -65,8 +65,6 @@ void Renderer::Close()
 Renderer::~Renderer()
 {
     Close();
-    delete ms_instance;
-    ms_instance = nullptr;
 }
 
 void Renderer::Render()
@@ -99,19 +97,8 @@ void Renderer::ProcessInput()
 
     constexpr float factor = 2.0f;
 
-    // if(glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-    //     m_camera.Zoom(factor);
-
-    // if(glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    //     m_camera.Zoom(-factor);
-
     for (auto it : m_inputCallbacks)
         it.second(glfwGetKey(m_window, it.first));
-
-    //upPressed = glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS;
-    //downPressed = glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS;
-    //leftPressed = glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS;
-    //rightPressed = glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(factor, 0.0f, 0.0f));
@@ -126,10 +113,10 @@ void Renderer::ProcessInput()
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, -factor, 0.0f));
 
     if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
-        m_camera.Zoom(factor);
+        m_camera.Zoom(-factor);
 
     if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
-        m_camera.Zoom(-factor);
+        m_camera.Zoom(factor);
 
 }
 
