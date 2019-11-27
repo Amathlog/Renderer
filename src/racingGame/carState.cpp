@@ -16,11 +16,11 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
 {
     CarState state;
 
-    const b2Body* hull = car.GetHull();
+    const b2Body* hull = car.GetHull().body;
     if (hull == nullptr)
         return state;
 
-    const std::vector<Car::Wheel>& wheels = car.GetWheels();
+    const std::vector<Car::Wheel>& wheels = car.GetHull().wheels;
     if (wheels.size() != 4)
         return state;
 

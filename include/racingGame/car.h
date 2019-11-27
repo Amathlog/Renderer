@@ -14,11 +14,13 @@ class CarController;
 class Car
 {
 public:
-
     struct Wheel
     {
         Wheel() = default;
 
+        void Destroy(b2World* world);
+
+        // Physics
         b2Body* body = nullptr;
         b2RevoluteJoint* joint = nullptr;
         float gas = 0.0f;
@@ -26,6 +28,26 @@ public:
         float steer = 0.0f;
         float phase = 0.0f;
         float omega = 0.0f;
+
+        // Rendering
+        Polygon* polygon = nullptr;
+    };
+
+    struct Hull
+    {
+        Hull() = default;
+
+        void Destroy(b2World* world);
+
+        // Physics
+        b2Body* body = nullptr;
+        glm::vec4 color;
+
+        // Rendering
+        Polygon* polygon = nullptr;
+
+        // Wheels
+        std::vector<Wheel> wheels;
     };
 
     Car(b2World* world, const glm::vec4& color);
@@ -37,7 +59,7 @@ public:
 
     void AttachController(CarController* controller) { m_controller = controller; }
     void DetachController() { m_controller = nullptr; }
-    CarController* GetController() { return m_controller; }
+    CarController* GetController() const { return m_controller; }
 
     void UpdateRendering();
 
@@ -50,27 +72,23 @@ public:
     float GetAngle() const;
     bool IsDrifting() const { return m_isDrifting; }
 
-    const b2Body* GetHull() const { return m_hull; }
-    const std::vector<Wheel>& GetWheels() const { return m_wheels; }
+    const Hull& GetHull() const { return m_hull; }
+
     unsigned int GetId() const { return m_id; }
 
     void UpdateTrackIndex(const Track::Path& path);
-    unsigned int GetCurrentTrackIndex() { return m_currentTrackIndex; }
+    unsigned int GetCurrentTrackIndex() const { return m_currentTrackIndex; }
 
     void EnableCollision(bool enable);
 private:
-    void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
-    // Physics part
+    // Not implemented yet
+    //void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
+    
     b2World* m_world = nullptr;
-    b2Body* m_hull = nullptr;
-    std::vector<Wheel> m_wheels;
-    // Rendering part
-    glm::vec4 m_hullColor;
-    Polygon* m_hullPolygon = nullptr;
-    std::vector<Polygon*> m_wheelsPolygon;
-    std::list<Polygon*> m_particlesPolygon;
+
+    Hull m_hull;
+
     bool m_isDrifting = false;
-    // The rest part
     unsigned int m_id = 0;
     unsigned int m_currentTrackIndex = 0;
     CarController* m_controller = nullptr;

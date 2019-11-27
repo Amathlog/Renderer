@@ -7,46 +7,55 @@
 #include <atomic>
 
 
+// ---------------------------------------------------------
+// Wheel Implementation
+// ---------------------------------------------------------
+
+void Car::Wheel::Destroy(b2World* world)
+{
+    delete polygon;
+    world->DestroyBody(body);
+}
+
+// --------------------------------------------------------
+// Hull implementation
+// --------------------------------------------------------
+
+void Car::Hull::Destroy(b2World* world)
+{
+    for (auto& wheel : wheels)
+    {
+        wheel.Destroy(world);
+    }
+
+    Renderer* renderer = Renderer::GetInstance();
+    if (renderer != nullptr)
+        renderer->RemoveRenderable(polygon->GetId());
+
+    delete polygon;
+    world->DestroyBody(body);
+}
+
+
+// --------------------------------------------------------
+// Car implementation
+// --------------------------------------------------------
+
 Car::Car(b2World* world, const glm::vec4& color)
     : m_world(world)
-    , m_hullColor(color)
 {
     static std::atomic<unsigned int> IDS = 1;
     m_id = IDS++;
+
+    m_hull.color = color;
+
     InitializePhysics();
     InitializeRendering();
 }
 
 Car::~Car()
 {
-    // Rendering
-    if (m_hullPolygon != nullptr)
-    {
-        // Delete the wheels
-        for (unsigned int i = 0; i < m_wheelsPolygon.size(); ++i)
-        {
-            m_hullPolygon->RemoveChild(m_wheelsPolygon[i]->GetId());
-            delete m_wheelsPolygon[i];
-        }
-        m_wheelsPolygon.clear();
-
-        Renderer* renderer = Renderer::GetInstance();
-        if (renderer != nullptr)
-            renderer->RemoveRenderable(m_hullPolygon->GetId());
-        delete m_hullPolygon;
-        m_hullPolygon = nullptr;
-    }
-
-    // Physics
-    if (m_world != nullptr)
-    {
-        for(auto& wheel : m_wheels)
-        {
-            // m_world->DestroyJoint(wheel.joint);
-            m_world->DestroyBody(wheel.body);
-        }
-        m_world->DestroyBody(m_hull);
-    }
+    m_hull.Destroy(m_world);
 }
 
 void Car::InitializePhysics()
@@ -57,7 +66,7 @@ void Car::InitializePhysics()
     // First the hull
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    m_hull = m_world->CreateBody(&bodyDef);
+    m_hull.body = m_world->CreateBody(&bodyDef);
     std::vector<float> vertices(Constants::HULL_VERTICES);
     std::vector<unsigned int> sizes = {4, 4, 9, 4};
     unsigned int i = 0;
@@ -74,11 +83,10 @@ void Car::InitializePhysics()
         }
         shape.Set(polygon.data(), (int32)polygon.size());
         i += size;
-        m_hull->CreateFixture(&shape, 1.0f);
+        m_hull.body->CreateFixture(&shape, 1.0f);
     }
 
     // Then the wheels (and attached them to the hull)
-    m_wheels.clear();
     std::vector<float> verticesWheel(Constants::WHEEL_VERTICES);
     b2PolygonShape wheelShape;
     wheelShape.SetAsBox(Constants::WHEEL_W * Constants::SCALE_CAR, Constants::WHEEL_R * Constants::SCALE_CAR);
@@ -100,7 +108,7 @@ void Car::InitializePhysics()
 
         // Then joint
         b2RevoluteJointDef jointDef;
-        jointDef.bodyA = m_hull;
+        jointDef.bodyA = m_hull.body;
         jointDef.bodyB = wheel;
         jointDef.localAnchorA = wheelBodyDef.position;
         jointDef.localAnchorB = b2Vec2_zero;
@@ -113,7 +121,7 @@ void Car::InitializePhysics()
         wheelStruct.joint = reinterpret_cast<b2RevoluteJoint*>(m_world->CreateJoint(&jointDef));
 
         // Finally add the wheel
-        m_wheels.push_back(wheelStruct);
+        m_hull.wheels.push_back(wheelStruct);
     }
 }
 
@@ -125,9 +133,9 @@ void Car::InitializeRendering()
     // First the hull
     std::vector<float> vertices(Constants::HULL_VERTICES);
     std::vector<unsigned int> indexes(Constants::HULL_INDEXES);
-    m_hullPolygon = new Polygon(vertices, indexes, m_hullColor);
-    m_hullPolygon->GetScale() = glm::vec3(Constants::SCALE_CAR, Constants::SCALE_CAR, 1.0f);
-    Renderer::GetInstance()->AddRenderable(m_hullPolygon);
+    m_hull.polygon = new Polygon(vertices, indexes, m_hull.color);
+    m_hull.polygon->GetScale() = glm::vec3(Constants::SCALE_CAR, Constants::SCALE_CAR, 1.0f);
+    Renderer::GetInstance()->AddRenderable(m_hull.polygon);
 
     // Then the wheels
     std::vector<unsigned int> indexesWheel = {0, 1, 2, 0, 2, 3};
@@ -136,19 +144,19 @@ void Car::InitializeRendering()
     for(unsigned int i = 0; i < 4; ++i){
         Polygon* wheel = new Polygon(verticesWheel, indexesWheel, wheelColor);
         wheel->GetPosition() = glm::vec3(Constants::WHEELPOS[2 * i], Constants::WHEELPOS[2 * i + 1], 0.0f);
-        m_hullPolygon->AddChild(wheel);
-        m_wheelsPolygon.push_back(wheel);
+        m_hull.polygon->AddChild(wheel);
+        m_hull.wheels[i].polygon = wheel;
     }
 }
 
 void Car::SetIntialState(const glm::vec2& pos, float angle)
 {
-    if (m_hull == nullptr || m_wheels.empty())
+    if (m_hull.body == nullptr)
         return;
     
     b2Vec2 box2DPos(pos[0], pos[1]);
-    m_hull->SetTransform(box2DPos, angle);
-    for (auto& wheel : m_wheels)
+    m_hull.body->SetTransform(box2DPos, angle);
+    for (auto& wheel : m_hull.wheels)
     {
         wheel.body->SetTransform(box2DPos + wheel.body->GetPosition(), angle);
     }
@@ -159,33 +167,31 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
 
 glm::vec2 Car::GetPosition() const
 {
-    if (m_hull == nullptr)
+    if (m_hull.body == nullptr)
         return glm::vec2(0.0f);
-    b2Vec2 pos = m_hull->GetPosition();
+    b2Vec2 pos = m_hull.body->GetPosition();
     return glm::vec2(pos.x, pos.y);
 }
 
 float Car::GetAngle() const
 {
-    if (m_hull == nullptr)
+    if (m_hull.body == nullptr)
         return 0.0f;
-    return m_hull->GetAngle();
+    return m_hull.body->GetAngle();
 }
 
 void Car::UpdateRendering()
 {
-    if (m_hullPolygon == nullptr || m_hull == nullptr)
+    if (m_hull.polygon == nullptr || m_hull.body == nullptr)
         return;
     
     glm::vec2 pos = GetPosition();
-    // pos[0] /= Constants::SCALE_CAR;
-    // pos[1] /= Constants::SCALE_CAR;
-    m_hullPolygon->GetPosition() = glm::vec3(pos.x, pos.y, 0.0f);
-    m_hullPolygon->GetRotation()[2] = GetAngle();
+    m_hull.polygon->GetPosition() = glm::vec3(pos.x, pos.y, 0.0f);
+    m_hull.polygon->GetRotation()[2] = GetAngle();
 
-    for (unsigned int i = 0; i < m_wheels.size(); ++i)
+    for (auto& wheel : m_hull.wheels)
     {
-        m_wheelsPolygon[i]->GetRotation()[2] = m_wheels[i].body->GetAngle() - m_hullPolygon->GetRotation()[2];
+        wheel.polygon->GetRotation()[2] = wheel.body->GetAngle() - m_hull.polygon->GetRotation()[2];
     }
 }
 
@@ -195,17 +201,17 @@ void Car::Gas(float gas)
     // Only rear wheels
     for (unsigned int i = 2; i < 4; ++i)
     {
-        float diff = gas - m_wheels[i].gas;
+        float diff = gas - m_hull.wheels[i].gas;
         if (diff > 0.1f)
             diff = 0.1f;  // gradually increase, but stop immediately
-        m_wheels[i].gas += diff;
+        m_hull.wheels[i].gas += diff;
     }
 }
 
 void Car::Brake(float brake)
 {
     // control: brake b=0..1, more than 0.9 blocks wheels to zero rotation
-    for (auto& wheel : m_wheels)
+    for (auto& wheel : m_hull.wheels)
         wheel.brake = brake;
 }
 
@@ -214,13 +220,13 @@ void Car::Steer(float steer)
     // Only front wheels
     for (unsigned int i = 0; i < 2; ++i)
     {
-        m_wheels[i].steer = steer;
+        m_hull.wheels[i].steer = steer;
     }
 }
 
 void Car::Step(float dt)
 {
-    for (auto& wheel : m_wheels)
+    for (auto& wheel : m_hull.wheels)
     {
         // std::cout << "Before Wheel: " << wheel.omega << std::endl;
         // Steer each wheel
@@ -333,11 +339,11 @@ void Car::UpdateTrackIndex(const Track::Path& path)
 
 void Car::EnableCollision(bool enable)
 {
-    if (m_hull == nullptr)
+    if (m_hull.body == nullptr)
         return;
 
     // Disable for hull
-    b2Fixture* hullFixtures = m_hull->GetFixtureList();
+    b2Fixture* hullFixtures = m_hull.body->GetFixtureList();
     while (hullFixtures != nullptr)
     {
         hullFixtures->SetSensor(!enable);
@@ -345,7 +351,7 @@ void Car::EnableCollision(bool enable)
     }
 
     // Then do the same for all the wheels
-    for (auto& wheel : m_wheels)
+    for (auto& wheel : m_hull.wheels)
     {
         b2Fixture* wheelFixtures = wheel.body->GetFixtureList();
         while (wheelFixtures != nullptr)
