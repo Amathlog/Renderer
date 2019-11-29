@@ -9,14 +9,14 @@ class Singleton
 public:
     static void CreateInstance()
     {
-        std::lock_guard<std::mutex> lock(m_lock);
+        std::lock_guard<std::mutex> lock(ms_lock);
         if (ms_instance == nullptr)
             ms_instance = new T(Token{});
     }
 
     static void DestroyInstance()
     {
-        std::lock_guard<std::mutex> lock(m_lock);
+        std::lock_guard<std::mutex> lock(ms_lock);
         delete ms_instance;
         ms_instance = nullptr;
     }
@@ -44,5 +44,5 @@ protected:
     struct Token {};
 
     static inline T* ms_instance = nullptr;
-    static inline std::mutex m_lock;
+    static inline std::mutex ms_lock;
 };
