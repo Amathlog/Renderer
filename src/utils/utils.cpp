@@ -95,7 +95,7 @@ glm::mat4 Utils::GetRotationMatrixFromP1toP2(const glm::vec3& p1, glm::vec3& p2)
     if (cosine == -1.0f)
     {
         // It means that the vector points to (0.0f, -1.0f, 0.0f), which means a rotation of Pi around Z
-        return glm::rotate(M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+        return glm::rotate(static_cast<float>(M_PI), glm::vec3(0.0f, 0.0f, 1.0f));
     }
     else
     {

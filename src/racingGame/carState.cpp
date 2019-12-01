@@ -116,9 +116,9 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     {
         DebugManager* debugManager = DebugManager::GetInstance();
         constexpr unsigned int frametime = 5;
-        char buffer[50];
-        sprintf_s(buffer, "distance_%d", carId);
-        debugManager->DrawLine(buffer, carPosition, projectionOnRoad, Colors::BLUE, frametime);
+        std::stringstream buffer;
+        buffer << "distance_" << carId; 
+        debugManager->DrawLine(buffer.str().c_str(), carPosition, projectionOnRoad, Colors::BLUE, frametime);
 
         std::array<Colors, SamplingIndexes::SAMPLING_INDEXES_SIZE> colors = {
             Colors::RED,
@@ -130,14 +130,16 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
 
         for (unsigned int i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)
         {
-            char buffer1[50];
-            char buffer2[50];
-            sprintf_s(buffer1, "offsetv_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
-            sprintf_s(buffer2, "offseth_%.2fm_%d", SamplingIndexes::SAMPLING_DISTANCES[i], carId);
+            std::stringstream buffer1;
+            std::stringstream buffer2;
+            buffer1.precision(2);
+            buffer2.precision(2);
+            buffer1 << "offsetv_" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m_" << carId;
+            buffer2 << "offseth_" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m_" << carId;
             firstPoint = carPosition + carForward * state.pointsFurther[2 * i] * state.debugPointsFurtherDistances[i];
             secondPoint = firstPoint + carSide * state.pointsFurther[2 * i + 1] * state.debugPointsFurtherDistances[i];
-            debugManager->DrawLine(buffer1, carPosition, firstPoint, colors[i], frametime);
-            debugManager->DrawLine(buffer2, firstPoint, secondPoint, colors[i], frametime);
+            debugManager->DrawLine(buffer1.str().c_str(), carPosition, firstPoint, colors[i], frametime);
+            debugManager->DrawLine(buffer2.str().c_str(), firstPoint, secondPoint, colors[i], frametime);
         }
     }
 
