@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <utils/utils.h>
 
 class b2World;
 class Car;
@@ -47,6 +48,7 @@ private:
     Track* m_track;
     std::unordered_map<unsigned int, Car*> m_cars;
     unsigned int m_numberOfPlayers = 0;
+    Utils::RingBuffer<float, 5> m_smoothCameraRotation;
 
     float m_elapsedTime = 0.0f;
     unsigned int m_nbFrames = 0;

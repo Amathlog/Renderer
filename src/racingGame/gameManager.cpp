@@ -15,6 +15,7 @@
 #include <iostream>
 #include <chrono> 
 #include <thread>
+#include <numeric>
 #include <GLFW/glfw3.h>
 #include <debugManager/debugManager.h>
 #include <utils/utils.h>
@@ -93,8 +94,10 @@ void GameManager::UpdateCamera()
 
     Car* firstCar = m_cars.begin()->second;
 
+    // Get the current angle and store it in our buffer
+    m_smoothCameraRotation.push_back(firstCar->GetAngle());
+    float angle = std::accumulate(m_smoothCameraRotation.buffer.begin(), m_smoothCameraRotation.buffer.end(), 0.0f) / m_smoothCameraRotation.size();
     // Set the rotation with the up vector
-    float angle = firstCar->GetAngle();
     glm::vec3 up(glm::vec3(-std::sin(angle), std::cos(angle), 0.0f));
     camera.SetUp(up);
 
@@ -187,6 +190,8 @@ void GameManager::UnspawnVehicle(unsigned int id)
     auto it = m_cars.find(id);
     if (it != m_cars.end())
     {
+        // If it is the first car, we want to clear our smoothing camera
+        m_smoothCameraRotation.clear();
         if (m_scenario != nullptr)
             m_scenario->OnVehicleUnspawned(it->second);
         delete it->second;
