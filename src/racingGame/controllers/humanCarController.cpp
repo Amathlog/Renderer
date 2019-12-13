@@ -8,35 +8,18 @@ HumanCarController::HumanCarController(unsigned int stateInterval)
 {
     Renderer* renderer = Renderer::GetInstance();
 
-    renderer->RegisterInputCallback(GLFW_KEY_UP, [&](int state)
-    {
-        m_upPressed = state == GLFW_PRESS;
-    }
-    );
-
-    renderer->RegisterInputCallback(GLFW_KEY_DOWN, [&](int state)
-    {
-        m_downPressed = state == GLFW_PRESS;
-    }
-    );
-
-    renderer->RegisterInputCallback(GLFW_KEY_LEFT, [&](int state)
-    {
-        m_leftPressed = state == GLFW_PRESS;
-    }
-    );
-
-    renderer->RegisterInputCallback(GLFW_KEY_RIGHT, [&](int state)
-    {
-        m_rightPressed = state == GLFW_PRESS;
-    }
-    );
+    m_callbackIds[0] = renderer->RegisterInputCallback(GLFW_KEY_UP, [&](int state) { m_upPressed = state == GLFW_PRESS; });
+    m_callbackIds[1] = renderer->RegisterInputCallback(GLFW_KEY_DOWN, [&](int state) { m_downPressed = state == GLFW_PRESS; });
+    m_callbackIds[2] = renderer->RegisterInputCallback(GLFW_KEY_LEFT, [&](int state) { m_leftPressed = state == GLFW_PRESS; });
+    m_callbackIds[3] = renderer->RegisterInputCallback(GLFW_KEY_RIGHT, [&](int state) { m_rightPressed = state == GLFW_PRESS; });
 }
 
 
 HumanCarController::~HumanCarController()
 {
-    Renderer::GetInstance()->ClearInputCallbacks();
+    Renderer* renderer = Renderer::GetInstance();
+    for (auto id : m_callbackIds)
+        renderer->RemoveInputCallback(id);
 }
 
 void HumanCarController::Update(const CarState&, Car& car)

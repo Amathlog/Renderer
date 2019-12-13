@@ -40,7 +40,8 @@ public:
     void Enable(bool enable) {m_enable = enable;}
     bool IsEnabled() {return m_enable;}
 
-    void RegisterInputCallback(int inputKey, std::function<void(int)> callback);
+    unsigned int RegisterInputCallback(int inputKey, std::function<void(int)> callback);
+    void RemoveInputCallback(unsigned int id);
     void ClearInputCallbacks() { m_inputCallbacks.clear(); }
 
 private:
@@ -54,6 +55,7 @@ private:
     bool m_enable = true;
     bool m_initialize = false;
 
-    using VectorInputCallbacks = std::vector<std::pair<int, std::function<void(int)>>>;
-    VectorInputCallbacks m_inputCallbacks;
+    using MapIdCallback = std::unordered_map<unsigned int, std::pair<int, std::function<void(int)>>>;
+    MapIdCallback m_inputCallbacks;
+    unsigned int m_latestCallbackId = 0;
 };
