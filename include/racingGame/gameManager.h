@@ -27,7 +27,7 @@ public:
     ~GameManager();
 
     void SetNumberOfPlayers(unsigned int numberOfPlayers) {m_numberOfPlayers = numberOfPlayers;}
-    void SpawnVehicle(unsigned int trackIndex = 0, bool reverse = false);
+    void SpawnVehicle(unsigned int trackIndex = 0, bool reverse = false, float offset = 0.0f);
     void UnspawnVehicle(unsigned int id);
 
     int Run();

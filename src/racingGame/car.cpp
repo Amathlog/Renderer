@@ -153,17 +153,26 @@ void Car::InitializeRendering()
     }
 }
 
-void Car::SetIntialState(const glm::vec2& pos, float angle)
+void Car::SetIntialState(const glm::vec2& pos, float angle, float offset)
 {
     if (m_hull.body == nullptr)
         return;
     
     b2Vec2 box2DPos(pos[0], pos[1]);
     m_hull.body->SetTransform(box2DPos, angle);
+
+    if (offset != 0.f)
+    {
+        b2Vec2 carSide = m_hull.body->GetWorldVector(b2Vec2(1.0f, 0.0f));
+        box2DPos += offset * carSide;
+        m_hull.body->SetTransform(box2DPos, angle);
+    }
+
     for (auto& wheel : m_hull.wheels)
     {
         wheel.body->SetTransform(box2DPos + wheel.body->GetPosition(), angle);
     }
+
     UpdateRendering();
 }
 

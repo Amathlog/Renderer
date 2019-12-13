@@ -67,7 +67,7 @@ public:
     void Brake(float brake);
     void Steer(float steer);
 
-    void SetIntialState(const glm::vec2& pos, float angle);
+    void SetIntialState(const glm::vec2& pos, float angle, float offset = 0.0f);
     glm::vec2 GetPosition() const;
     float GetAngle() const;
     bool IsDrifting() const { return m_isDrifting; }

@@ -5,7 +5,7 @@
 
 void HumanSinglePlayerScenario::OnVehicleSpawned(Car* car)
 {
-    m_currentController = new HumanCarController(1);
+    m_currentController = new HumanCarController(1, 0);
     car->AttachController(m_currentController);
 }
 

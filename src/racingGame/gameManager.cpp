@@ -171,10 +171,10 @@ void GameManager::Step(float dt)
     m_nbFrames++;
 };
 
-void GameManager::SpawnVehicle(unsigned int trackIndex, bool reverse)
+void GameManager::SpawnVehicle(unsigned int trackIndex, bool reverse, float offset)
 {
     Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), trackIndex, reverse);
-    car->SetIntialState(m_track->GetPath()[trackIndex], m_track->GetAngle(trackIndex, reverse));
+    car->SetIntialState(m_track->GetPath()[trackIndex], m_track->GetAngle(trackIndex, reverse), offset);
     m_cars.emplace(car->GetId(), car);
 
     if (m_scenario != nullptr)
