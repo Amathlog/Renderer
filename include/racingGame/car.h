@@ -50,7 +50,7 @@ public:
         std::vector<Wheel> wheels;
     };
 
-    Car(b2World* world, const glm::vec4& color);
+    Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse);
     ~Car();
 
     void InitializePhysics();
@@ -80,6 +80,8 @@ public:
     unsigned int GetCurrentTrackIndex() const { return m_currentTrackIndex; }
 
     void EnableCollision(bool enable);
+
+    bool GetIsReverse() const { return m_isReverse; }
 private:
     // Not implemented yet
     //void CreateParticles(const glm::vec3& p1, const glm::vec3& p2, bool inGrass);
@@ -92,4 +94,5 @@ private:
     unsigned int m_id = 0;
     unsigned int m_currentTrackIndex = 0;
     CarController* m_controller = nullptr;
+    bool m_isReverse = false;
 };

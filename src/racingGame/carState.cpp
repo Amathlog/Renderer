@@ -14,6 +14,21 @@
 
 CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo, unsigned int carId)
 {
+    bool reverse = car.GetIsReverse();
+
+    auto getIndex = [&path, reverse](size_t start, long long idxFurther)
+    {
+        long long res = reverse ? start - idxFurther : start + idxFurther;
+        // Resolve negative values
+        while (res < 0)
+            res += path.size();
+        // Resolve out of path values
+        while (res >= static_cast<long long>(path.size()))
+            res -= path.size();
+        // We are sure to have a positive number
+        return static_cast<size_t>(res);
+    };
+
     CarState state;
 
     const b2Body* hull = car.GetHull().body;
@@ -32,11 +47,11 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     // Compute relevant information first
     const glm::vec2& currentPathPoint = path[currentIndex];
     // Find the closest other point
-    size_t previousIndex = currentIndex == 0 ? path.size() - 1 : currentIndex - 1;
-    size_t nextIndex = (currentIndex + 1) % path.size();
+    size_t previousIndex = getIndex(currentIndex, -1);
+    size_t nextIndex = getIndex(currentIndex, 1);
     const glm::vec2& previousPathPoint = path[previousIndex];
     const glm::vec2& nextPathPoint = path[nextIndex];
-    
+
     glm::vec2 firstPoint, secondPoint;
     size_t startingIndex;
     if (glm::length(carPosition - previousPathPoint) < glm::length(carPosition - nextPathPoint))
@@ -58,7 +73,7 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     glm::vec2 projectionOnRoad = firstPoint + projectionDistance * roadDirection;
 
     glm::vec2 positionToProjection = carPosition - projectionOnRoad;
-    
+
     state.distanceFromRoad = glm::dot(positionToProjection, roadSide) > 0 ?
                              glm::length(positionToProjection) :
                              -glm::length(positionToProjection);
@@ -77,7 +92,7 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
         // Only store angles for front wheels
         if (i < 2)
         {
-            state.wheelAngles[i] = wheels[i].body->GetAngle() / M_PI;
+            state.wheelAngles[i] = (wheels[i].body->GetAngle() - hull->GetAngle()) / M_PI;
         }
         state.wheelOmegas[i] = wheels[i].omega / MAX_OMEGA;
     }
@@ -88,18 +103,18 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
 
     // Project further
     SamplingIndexes samplingIndexes;
-    
+
     for (unsigned int i = 0; i < SamplingIndexes::SAMPLING_INDEXES_SIZE; ++i)
     {
         float distance = samplingIndexes.precomputedDistances[i] + projectionDistance;
-        size_t index = (samplingIndexes.precomputedIndexes[i] + startingIndex) % path.size();
+        size_t index = getIndex(startingIndex, samplingIndexes.precomputedIndexes[i]);
         while (distance >= Constants::TRACK_DETAIL_STEP)
         {
-            index = (index + 1) % path.size();
+            index = getIndex(index, 1);
             distance -= Constants::TRACK_DETAIL_STEP;
         }
         firstPoint = path[index];
-        secondPoint = path[(index + 1) % path.size()];
+        secondPoint = path[getIndex(index, 1)];
         glm::vec2 dir = Utils::NormalizeWithEpsilon(secondPoint - firstPoint);
         glm::vec2 wantedPoint = firstPoint + distance * dir;
 
@@ -117,7 +132,7 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
         DebugManager* debugManager = DebugManager::GetInstance();
         constexpr unsigned int frametime = 5;
         std::stringstream buffer;
-        buffer << "distance_" << carId; 
+        buffer << "distance_" << carId;
         debugManager->DrawLine(buffer.str().c_str(), carPosition, projectionOnRoad, Colors::BLUE, frametime);
 
         std::array<Colors, SamplingIndexes::SAMPLING_INDEXES_SIZE> colors = {

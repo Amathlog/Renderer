@@ -6,6 +6,7 @@
 #include <renderer/renderer.h>
 #include <shaders/shaderManager.h>
 #include <utils/randomEngine.h>
+#include <utils/utils.h>
 
 #include <cmath>
 #include <random>
@@ -359,4 +360,17 @@ void Track::ClearBackground()
         delete square;
     }
     m_backgroundSquares.clear();
+}
+
+float Track::GetAngle(size_t index, bool reverse)
+{
+    size_t nextIndex;
+    if (index == 0 && reverse)
+        nextIndex = m_path.size() - 1;
+    else if (index == m_path.size() - 1 && !reverse)
+        nextIndex = 0;
+    else
+        nextIndex = reverse ? index - 1 : index + 1;
+
+    return Utils::GetAngle(glm::vec2(0.0f, 1.0f), m_path[nextIndex] - m_path[index]);
 }

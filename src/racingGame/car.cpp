@@ -41,8 +41,10 @@ void Car::Hull::Destroy(b2World* world)
 // Car implementation
 // --------------------------------------------------------
 
-Car::Car(b2World* world, const glm::vec4& color)
+Car::Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse)
     : m_world(world)
+    , m_currentTrackIndex(initialTrackIndex)
+    , m_isReverse(isReverse)
 {
     static std::atomic<unsigned int> IDS = 1;
     m_id = IDS++;
@@ -51,6 +53,8 @@ Car::Car(b2World* world, const glm::vec4& color)
 
     InitializePhysics();
     InitializeRendering();
+
+    m_isDrifting = false;
 }
 
 Car::~Car()
@@ -161,8 +165,6 @@ void Car::SetIntialState(const glm::vec2& pos, float angle)
         wheel.body->SetTransform(box2DPos + wheel.body->GetPosition(), angle);
     }
     UpdateRendering();
-    m_isDrifting = false;
-    m_currentTrackIndex = 0;
 }
 
 glm::vec2 Car::GetPosition() const

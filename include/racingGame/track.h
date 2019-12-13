@@ -25,6 +25,7 @@ public:
     void ClearBackground();
     const Path& GetPath() {return m_path;}
     float GetIntialAngle() {return m_initialAngle;}
+    float GetAngle(size_t index, bool reverse);
 
 private:
     std::vector<Polygon*> m_backgroundSquares;
