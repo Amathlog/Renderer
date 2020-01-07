@@ -23,9 +23,9 @@ public:
     bool GenerateTrack();
     void ClearTrack();
     void ClearBackground();
-    const Path& GetPath() {return m_path;}
-    float GetIntialAngle() {return m_initialAngle;}
-    float GetAngle(size_t index, bool reverse);
+    const Path& GetPath() const {return m_path;}
+    float GetIntialAngle() const {return m_initialAngle;}
+    float GetAngle(size_t index, bool reverse) const;
 
 private:
     std::vector<Polygon*> m_backgroundSquares;

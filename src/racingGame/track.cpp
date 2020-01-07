@@ -362,7 +362,7 @@ void Track::ClearBackground()
     m_backgroundSquares.clear();
 }
 
-float Track::GetAngle(size_t index, bool reverse)
+float Track::GetAngle(size_t index, bool reverse) const
 {
     size_t nextIndex;
     if (index == 0 && reverse)
