@@ -33,6 +33,8 @@ public:
     int Run();
     void Reset();
 
+    const Track* GetTrack() const { return m_track; }
+
 private:
     int Initialize();
 
