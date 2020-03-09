@@ -151,7 +151,7 @@ void GameManager::Step(float dt)
         CarController* controller = car->GetController();
         if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
         {
-            CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i);
+            CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i, m_cars);
             controller->Update(state, *car);
         }
 

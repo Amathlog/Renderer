@@ -2,6 +2,8 @@
 
 #include <array>
 #include <string>
+#include <unordered_map>
+#include <set>
 #include <racingGame/track.h>
 #include <racingGame/constants.h>
 
@@ -50,11 +52,24 @@ struct SamplingIndexes
     size_t precomputedIndexes[SAMPLING_INDEXES_SIZE];
 };
 
+struct OpponentCar
+{
+    unsigned int index;
+    float distance;
+    glm::vec2 position;
+    glm::vec2 velocity;
+    glm::vec2 forward;
+};
+
+inline bool operator<(const OpponentCar& c1, const OpponentCar& c2)
+{
+    return c1.distance < c2.distance;
+}
+
 struct CarState
 {
     constexpr static inline float MAX_SPEED = 40.0f;
     constexpr static inline float MAX_OMEGA = 40.0f;
-    constexpr static inline unsigned int STATE_SIZE = 4 + 2 + 2 + 4 + 2 * SamplingIndexes::SAMPLING_INDEXES_SIZE;
 
     CarState() = default;
 
@@ -67,10 +82,10 @@ struct CarState
     float driftAngle = 0.0f;
     std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE*2> pointsFurther;
     std::array<float, SamplingIndexes::SAMPLING_INDEXES_SIZE> debugPointsFurtherDistances;
+    std::multiset<OpponentCar> opponentsOrdered;
 
-    static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo = false, unsigned int carId = 0);
-
-    void ExportToArray(std::array<float, STATE_SIZE>& outArray) const;
+    static CarState GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, 
+        bool addDebugInfo, unsigned int carId, const std::unordered_map<unsigned int, Car*>& allCars);
 
     std::string ToString();
 };

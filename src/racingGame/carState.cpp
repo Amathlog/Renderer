@@ -12,7 +12,8 @@
 #endif
 
 
-CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, bool addDebugInfo, unsigned int carId)
+CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsigned int currentIndex, 
+    bool addDebugInfo, unsigned int carId, const std::unordered_map<unsigned int, Car*>& allCars)
 {
     bool reverse = car.GetIsReverse();
 
@@ -127,6 +128,26 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
         state.debugPointsFurtherDistances[i] = lengthVec;
     }
 
+    for (const auto& itCar : allCars)
+    {
+        const Car* otherCar = itCar.second;
+
+        // Don't compare our car!
+        if (otherCar == &car)
+            continue;
+
+        const b2Body* otherHull = otherCar->GetHull().body;
+
+        OpponentCar opponentCar;
+        opponentCar.index = itCar.first;
+        opponentCar.position = Utils::Convertb2Toglm(otherHull->GetPosition());
+        opponentCar.velocity = Utils::Convertb2Toglm(otherHull->GetLinearVelocity());
+        opponentCar.forward = Utils::Convertb2Toglm(otherHull->GetWorldVector(b2Vec2(0.0f, 1.0f)));
+        opponentCar.distance = glm::length(carPosition - opponentCar.position);
+
+        state.opponentsOrdered.emplace(std::move(opponentCar));
+    }
+
     if (addDebugInfo)
     {
         DebugManager* debugManager = DebugManager::GetInstance();
@@ -161,32 +182,17 @@ CarState CarState::GenerateState(const Car& car, const Track::Path& path, unsign
     return state;
 }
 
-void CarState::ExportToArray(std::array<float, STATE_SIZE>& outArray) const
-{
-    size_t size = 0;
-
-    // Utility function
-    auto copyToOutput = [&size, &outArray](auto& arrayToCopy)
-    {
-        std::copy(arrayToCopy.begin(), arrayToCopy.end(), outArray.begin() + size);
-        size += arrayToCopy.size();
-    };
-
-    outArray[size++] = distanceFromRoad;
-    copyToOutput(carVelocityRoadRef);
-    outArray[size++] = angleWithRoad;
-    copyToOutput(wheelAngles);
-    copyToOutput(wheelOmegas);
-    outArray[size++] = carOmega;
-    outArray[size++] = driftAngle;
-    copyToOutput(pointsFurther);
-
-    assert(size == STATE_SIZE);
-}
-
 std::string CarState::ToString()
 {
+    auto vecToStr = [](const glm::vec2& v)
+    {
+        std::stringstream stream;
+        stream << "(" << v[0] << "," << v[1] << ")";
+        return stream.str();
+    };
+
     std::stringstream res;
+
     res << "Distance from road: " << distanceFromRoad << std::endl;
     res << "Velocity: x=" << carVelocityRoadRef[0] << " ; y=" << carVelocityRoadRef[1] << std::endl;
     res << "Angle with road:" << angleWithRoad << std::endl;
@@ -199,6 +205,12 @@ std::string CarState::ToString()
     {
         res << "    *" << SamplingIndexes::SAMPLING_DISTANCES[i] << "m: " << pointsFurther[2 * i] << ", " \
             << pointsFurther[2 * i + 1] << std::endl;
+    }
+    res << "Opponents information: (index, distance, pos, vel, fwd)" << std::endl;
+    for (const auto& it : opponentsOrdered)
+    {
+        res << "    *" << it.index << ", " << it.distance << ", " << vecToStr(it.position) << ", " 
+            << vecToStr(it.velocity) << ", " << vecToStr(it.forward) << std::endl;
     }
     return res.str();
 }
