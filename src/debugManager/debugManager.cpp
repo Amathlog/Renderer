@@ -36,10 +36,15 @@ void DebugManager::Clear()
 void DebugManager::Update()
 {
     auto it = m_mapDebugFigures.begin();
+    const Renderer* renderer = Renderer::GetInstance();
     // Remove items that have no more time remaining
     while (it != m_mapDebugFigures.end())
     {
-        if (--(it->second.frameTimeRemaining) < 0)
+        // Only decrease the number of frame remaining if we are not in pause
+        if (!renderer->paused)
+            --(it->second.frameTimeRemaining);
+
+        if (it->second.frameTimeRemaining < 0)
             m_mapDebugFigures.erase(it);
         else
             ++it;

@@ -36,12 +36,33 @@ void Car::Hull::Destroy(b2World* world)
     world->DestroyBody(body);
 }
 
+// --------------------------------------------------------
+// LapInfo implementation
+// --------------------------------------------------------
+void Car::LapInfo::InitializeLap(unsigned int initialTrackIndex, float currentTimeS)
+{
+    // If we don't start at 0, the first lap doesn't count (as we don't do a full lap)
+    nbLaps = initialTrackIndex == 0 ? 0 : -1;
+    timeAtLapStartS = currentTimeS;
+}
+
+void Car::LapInfo::UpdateLap(float currentTimeS)
+{
+    nbLaps++;
+    if (nbLaps > 0)
+    {
+        lastLapTimeS = currentTimeS - timeAtLapStartS;
+        if (bestLapTimeS == 0.0f || lastLapTimeS < bestLapTimeS)
+            bestLapTimeS = lastLapTimeS;
+    }
+    timeAtLapStartS = currentTimeS;
+}
 
 // --------------------------------------------------------
 // Car implementation
 // --------------------------------------------------------
 
-Car::Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse)
+Car::Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse, float currentTime)
     : m_world(world)
     , m_currentTrackIndex(initialTrackIndex)
     , m_isReverse(isReverse)
@@ -53,6 +74,7 @@ Car::Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex,
 
     InitializePhysics();
     InitializeRendering();
+    m_lapInfo.InitializeLap(initialTrackIndex, currentTime);
 
     m_isDrifting = false;
 }
@@ -182,6 +204,14 @@ glm::vec2 Car::GetPosition() const
         return glm::vec2(0.0f);
     b2Vec2 pos = m_hull.body->GetPosition();
     return glm::vec2(pos.x, pos.y);
+}
+
+glm::vec2 Car::GetVelocity() const
+{
+    if (m_hull.body == nullptr)
+        return glm::vec2(0.0f);
+    b2Vec2 vel = m_hull.body->GetLinearVelocity();
+    return glm::vec2(vel.x, vel.y);
 }
 
 float Car::GetAngle() const
@@ -327,7 +357,7 @@ void Car::Step(float dt)
     }
 }
 
-void Car::UpdateTrackIndex(const Track::Path& path)
+void Car::UpdateTrackIndex(const Track::Path& path, float currentTime)
 {
     glm::vec2 position = GetPosition();
     float minDistance = -1.0f;
@@ -345,6 +375,10 @@ void Car::UpdateTrackIndex(const Track::Path& path)
             closestIndex = finalIndex;
         }
     }
+    
+    if (closestIndex == 0 && m_currentTrackIndex != 0)
+        m_lapInfo.UpdateLap(currentTime);
+
     m_currentTrackIndex = closestIndex;
 }
 

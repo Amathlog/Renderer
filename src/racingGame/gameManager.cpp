@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 #include <Box2D/Box2D.h>
-#include <racingGame/car.h>
 #include <racingGame/track.h>
 
 #include <renderer/renderer.h>
@@ -86,6 +85,41 @@ void GameManager::Reset()
     while(!m_track->GenerateTrack());
 }
 
+const Car::LapInfo* GameManager::GetLapInfoFromId(unsigned int id) const
+{
+    const auto& it = m_cars.find(id);
+    if (it == m_cars.end())
+        return nullptr;
+    return &it->second->GetLapInfo();
+}
+
+void GameManager::GetCarsIndexOnTrack(std::vector<unsigned int>& outVector) const
+{
+    outVector.clear();
+    outVector.reserve(m_cars.size());
+    for (const auto& it : m_cars)
+    {
+        outVector.push_back(it.second->GetCurrentTrackIndex());
+    }
+}
+
+void GameManager::UpdateCarsRanking()
+{
+    if (!m_config.computeRankings)
+        return;
+
+    unsigned int trackLength = m_track->GetLength();
+
+    std::sort(m_raceRanking.begin(), m_raceRanking.end(),
+        [trackLength](const Car*& a, const Car*& b)
+    {
+        unsigned int rankA = a->GetLapInfo().nbLaps == -1 ? 0 : a->GetLapInfo().nbLaps * trackLength + a->GetCurrentTrackIndex();
+        unsigned int rankB = b->GetLapInfo().nbLaps == -1 ? 0 : b->GetLapInfo().nbLaps * trackLength + b->GetCurrentTrackIndex();
+        return rankA > rankB;
+    }
+    );
+}
+
 void GameManager::UpdateCamera()
 {
     if (m_cars.empty())
@@ -125,7 +159,7 @@ void GameManager::DestroySingletons()
     Renderer::DestroyInstance();
 }
 
-void GameManager::Step(float dt) 
+void GameManager::Step() 
 {
     // No scenario, nothing to do...
     if (m_scenario == nullptr)
@@ -135,31 +169,39 @@ void GameManager::Step(float dt)
 
     bool shouldReset = false;
     unsigned int i = 0;
-    for (auto it : m_cars)
+    float elapsedTime = GetElapsedTime();
+
+    // Don't update the physics if we are on pause
+    if (!Renderer::GetInstance()->paused)
     {
-        Car* car = it.second;
-        // Check if the car is out
-        const glm::vec2& carPos = car->GetPosition();
-        if (std::abs(carPos[0]) > 0.85f * Constants::PLAYFIELD ||
-            std::abs(carPos[1]) > 0.85f * Constants::PLAYFIELD)
+        for (auto it : m_cars)
         {
-            shouldReset = true;
-            break;
-        }
-        
-        car->UpdateTrackIndex(m_track->GetPath());
-        CarController* controller = car->GetController();
-        if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
-        {
-            CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i, m_cars);
-            controller->Update(state, *car);
+            Car* car = it.second;
+            // Check if the car is out
+            const glm::vec2& carPos = car->GetPosition();
+            if (std::abs(carPos[0]) > 0.85f * Constants::PLAYFIELD ||
+                std::abs(carPos[1]) > 0.85f * Constants::PLAYFIELD)
+            {
+                shouldReset = true;
+                break;
+            }
+
+            car->UpdateTrackIndex(m_track->GetPath(), elapsedTime);
+            CarController* controller = car->GetController();
+            if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
+            {
+                CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i, m_cars);
+                controller->Update(state, *car);
+            }
+
+            car->Step(m_dt);
+            car->UpdateRendering();
         }
 
-        car->Step(dt);
-        car->UpdateRendering();
+        m_world->Step(m_dt, 6 * 30, 2 * 30);
+
+        UpdateCarsRanking();
     }
-
-    m_world->Step(dt, 6*30, 2*30);
 
     if (m_config.attachCamera)
         UpdateCamera();
@@ -167,13 +209,12 @@ void GameManager::Step(float dt)
     if (shouldReset)
         Reset();
 
-    m_elapsedTime += dt;
     m_nbFrames++;
 };
 
 void GameManager::SpawnVehicle(unsigned int trackIndex, bool reverse, float offset)
 {
-    Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), trackIndex, reverse);
+    Car* car = new Car(m_world, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), trackIndex, reverse, GetElapsedTime());
     car->SetIntialState(m_track->GetPath()[trackIndex], m_track->GetAngle(trackIndex, reverse), offset);
     m_cars.emplace(car->GetId(), car);
 
@@ -186,6 +227,10 @@ void GameManager::UnspawnVehicle(unsigned int id)
     auto it = m_cars.find(id);
     if (it != m_cars.end())
     {
+        auto rankIt = std::find(m_raceRanking.begin(), m_raceRanking.end(), it->second);
+        if (rankIt != m_raceRanking.end())
+            m_raceRanking.erase(rankIt);
+
         // If it is the first car, we want to clear our smoothing camera
         m_smoothCameraRotation.clear();
         if (m_scenario != nullptr)
@@ -220,7 +265,7 @@ int GameManager::Run()
         params = { -200.0f, 200.0f, -200.0f, 200.0f, -0.1f, 10.0f };
 
     int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / m_config.fps));
-    float dt = 1.0f / m_config.fps;
+    m_dt = 1.0f / m_config.fps;
 
     // Then initialize the game
     errorCode = Initialize();
@@ -244,7 +289,7 @@ int GameManager::Run()
         auto tickTimePhysics = std::chrono::high_resolution_clock::now();
 #endif // PROFILING
 
-        Step(dt);
+        Step();
 
 #ifdef PROFILING
         auto differencePhysics = std::chrono::high_resolution_clock::now() - tickTimePhysics;

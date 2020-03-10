@@ -27,6 +27,8 @@ public:
     float GetIntialAngle() const {return m_initialAngle;}
     float GetAngle(size_t index, bool reverse) const;
 
+    unsigned int GetLength() const { return static_cast<unsigned int>(m_path.size()); }
+
 private:
     std::vector<Polygon*> m_backgroundSquares;
     Polygon* m_tilesPolygon = nullptr;

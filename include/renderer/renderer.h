@@ -37,6 +37,8 @@ public:
     bool leftPressed = false;
     bool rightPressed = false;
 
+    bool paused = false;
+
     void Enable(bool enable) {m_enable = enable;}
     bool IsEnabled() {return m_enable;}
 

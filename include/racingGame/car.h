@@ -50,7 +50,18 @@ public:
         std::vector<Wheel> wheels;
     };
 
-    Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse);
+    struct LapInfo
+    {
+        int nbLaps = -1;
+        float lastLapTimeS = 0.0f;
+        float bestLapTimeS = 0.0f;
+        float timeAtLapStartS = 0.0f;
+
+        void InitializeLap(unsigned int initialTrackIndex, float currentTimeS);
+        void UpdateLap(float currentTimeS);
+    };
+
+    Car(b2World* world, const glm::vec4& color, unsigned int initialTrackIndex, bool isReverse, float currentTimeS);
     ~Car();
 
     void InitializePhysics();
@@ -69,6 +80,7 @@ public:
 
     void SetIntialState(const glm::vec2& pos, float angle, float offset = 0.0f);
     glm::vec2 GetPosition() const;
+    glm::vec2 GetVelocity() const;
     float GetAngle() const;
     bool IsDrifting() const { return m_isDrifting; }
 
@@ -76,8 +88,10 @@ public:
 
     unsigned int GetId() const { return m_id; }
 
-    void UpdateTrackIndex(const Track::Path& path);
+    void UpdateTrackIndex(const Track::Path& path, float currentTimeS);
     unsigned int GetCurrentTrackIndex() const { return m_currentTrackIndex; }
+
+    const LapInfo& GetLapInfo() const { return m_lapInfo; }
 
     void EnableCollision(bool enable);
 
@@ -93,6 +107,7 @@ private:
     bool m_isDrifting = false;
     unsigned int m_id = 0;
     unsigned int m_currentTrackIndex = 0;
+    LapInfo m_lapInfo;
     CarController* m_controller = nullptr;
     bool m_isReverse = false;
 };

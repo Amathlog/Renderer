@@ -2,6 +2,7 @@
 #include <racingGame/controllers/humanCarController.h>
 #include <racingGame/car.h>
 #include <racingGame/gameManager.h>
+#include <racingGame/scenarios/spawningStrategy.h>
 
 void HumanSinglePlayerScenario::OnVehicleSpawned(Car* car)
 {
@@ -19,6 +20,6 @@ void HumanSinglePlayerScenario::OnVehicleUnspawned(Car* car)
 void HumanSinglePlayerScenario::Update(GameManager& manager)
 {
     if (m_currentController == nullptr)
-        manager.SpawnVehicle();
+        SpawningStrategy::SpawnVehicle(manager, SpawningStrategy::Strategy::Strategy_AllOnStart);
 }
 

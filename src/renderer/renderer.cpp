@@ -118,6 +118,24 @@ void Renderer::ProcessInput()
     if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
         m_camera.Zoom(factor);
 
+    auto toggle = [this](int key, bool& staticBool)
+    {
+        int getKey = glfwGetKey(m_window, key);
+        if (getKey == GLFW_PRESS && !staticBool)
+        {
+            staticBool = true;
+            return true;
+        }
+        else if (getKey == GLFW_RELEASE && staticBool)
+        {
+            staticBool = false;
+        }
+        return false;
+    };
+
+    static bool pressedPause = false;
+    if (toggle(GLFW_KEY_PAUSE, pressedPause))
+        paused = !paused;
 }
 
 bool Renderer::RequestedClose()
@@ -148,7 +166,7 @@ void Renderer::RemoveRenderable(unsigned int id)
 unsigned int Renderer::RegisterInputCallback(int inputKey, std::function<void(int)> callback)
 {
     if (!m_enable)
-        return -1;
+        return 0;
 
     m_inputCallbacks.emplace(m_latestCallbackId++, MapIdCallback::mapped_type(inputKey, callback));
 

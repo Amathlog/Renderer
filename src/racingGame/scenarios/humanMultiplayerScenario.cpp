@@ -4,6 +4,7 @@
 #include <racingGame/gameManager.h>
 #include <racingGame/constants.h>
 #include <iostream>
+#include <racingGame/scenarios/spawningStrategy.h>
 
 HumanMultiplayerScenario::HumanMultiplayerScenario(unsigned int nbPlayers)
 {
@@ -45,11 +46,8 @@ void HumanMultiplayerScenario::OnVehicleUnspawned(Car* car)
 
 void HumanMultiplayerScenario::Update(GameManager& manager)
 {
-    static float offset = Constants::TRACK_WIDTH / 2.0f;
+    SpawningStrategy::ResetInternalVariables();
     while (m_controllers.size() < m_nbPlayers)
-    {
-        manager.SpawnVehicle(0, false, offset);
-        offset *= -1.0f;
-    }
+        SpawningStrategy::SpawnVehicle(manager, SpawningStrategy::Strategy::Strategy_Formula1);
 }
 
