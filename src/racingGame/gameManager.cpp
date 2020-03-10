@@ -22,8 +22,16 @@
 
 #define PROFILING
 
+namespace
+{
+    const GameConfig& GetGameConfig()
+    {
+        return GameConfigSingleton::GetInstance()->m_gameConfig;
+    }
+}
+
 GameManager::GameManager(const GameConfig& config, Scenario* scenario)
-    : m_config(config)
+    : m_initialGameConfig(config)
     , m_scenario(scenario)
 {
 
@@ -105,7 +113,7 @@ void GameManager::GetCarsIndexOnTrack(std::vector<unsigned int>& outVector) cons
 
 void GameManager::UpdateCarsRanking()
 {
-    if (!m_config.computeRankings)
+    if (!GetGameConfig().computeRankings)
         return;
 
     unsigned int trackLength = m_track->GetLength();
@@ -118,6 +126,11 @@ void GameManager::UpdateCarsRanking()
         return rankA > rankB;
     }
     );
+}
+
+float GameManager::GetElapsedTime() const
+{
+    return GetGameConfig().GetDt() * m_nbFrames;
 }
 
 void GameManager::UpdateCamera()
@@ -149,17 +162,19 @@ void GameManager::CreateSingletons()
     DebugManager::CreateInstance();
     RandomEngine::CreateInstance();
     ShaderManager::CreateInstance();
+    GameConfigSingleton::CreateInstance();
 }
 
 void GameManager::DestroySingletons()
 {
+    GameConfigSingleton::DestroyInstance();
     ShaderManager::DestroyInstance();
     RandomEngine::DestroyInstance();
     DebugManager::DestroyInstance();
     Renderer::DestroyInstance();
 }
 
-void GameManager::Step() 
+void GameManager::Step(float dt) 
 {
     // No scenario, nothing to do...
     if (m_scenario == nullptr)
@@ -170,6 +185,13 @@ void GameManager::Step()
     bool shouldReset = false;
     unsigned int i = 0;
     float elapsedTime = GetElapsedTime();
+
+    const GameConfig& config = GetGameConfig();
+    float realDt = dt;
+    // Slow down if the speed is below 1
+    // Speed up is not supported for now
+    if (config.speed < 1.0f)
+        realDt *= config.speed;
 
     // Don't update the physics if we are on pause
     if (!Renderer::GetInstance()->paused)
@@ -188,22 +210,27 @@ void GameManager::Step()
 
             car->UpdateTrackIndex(m_track->GetPath(), elapsedTime);
             CarController* controller = car->GetController();
-            if (controller != nullptr && m_nbFrames % controller->GetStateInterval() == 0)
+            // Slow down if the speed is below 1
+            // Speed up is not supported for now
+            unsigned int stateInterval = controller->GetStateInterval();
+            if (config.speed < 1.0f)
+                stateInterval = static_cast<unsigned int>(std::floor(stateInterval / config.speed));
+            if (controller != nullptr && m_nbFrames % stateInterval == 0)
             {
-                CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), m_config.debugInfo, i, m_cars);
+                CarState state = CarState::GenerateState(*car, m_track->GetPath(), car->GetCurrentTrackIndex(), config.debugInfo, i, m_cars);
                 controller->Update(state, *car);
             }
 
-            car->Step(m_dt);
+            car->Step(realDt);
             car->UpdateRendering();
         }
 
-        m_world->Step(m_dt, 6 * 30, 2 * 30);
+        m_world->Step(realDt, 6 * 30, 2 * 30);
 
         UpdateCarsRanking();
     }
 
-    if (m_config.attachCamera)
+    if (config.attachCamera)
         UpdateCamera();
 
     if (shouldReset)
@@ -244,10 +271,14 @@ int GameManager::Run()
 {
     CreateSingletons();
 
+    GameConfigSingleton::GetInstance()->Reset(m_initialGameConfig);
+
+    const GameConfig& config = GetGameConfig();
+
     // Initialize the renderer
     Renderer* renderer = Renderer::GetInstance();
-    renderer->Enable(m_config.enableRendering);
-    int errorCode = renderer->Initialize(m_config.windowWidth, m_config.windowHeight);
+    renderer->Enable(config.enableRendering);
+    int errorCode = renderer->Initialize(config.windowWidth, config.windowHeight);
     if (errorCode != 0)
         return errorCode;
 
@@ -259,20 +290,17 @@ int GameManager::Run()
     camera.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::OrthographicParams& params = camera.GetOrthographicParams();
     // Setup differently if we are attached or not to a car
-    if (m_config.attachCamera)
+    if (config.attachCamera)
         params = { -30.0f, 30.0f, -30.0f, 30.0f, -0.1f, 10.0f };
     else
         params = { -200.0f, 200.0f, -200.0f, 200.0f, -0.1f, 10.0f };
-
-    int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / m_config.fps));
-    m_dt = 1.0f / m_config.fps;
 
     // Then initialize the game
     errorCode = Initialize();
     if (errorCode != 0)
         return errorCode;
     // CHANGE WITH AI CONTROLLERS
-    SetNumberOfPlayers(m_config.humanPlay ? 1 : 1);
+    SetNumberOfPlayers(config.humanPlay ? 1 : 1);
     Reset();
 
 #ifdef PROFILING
@@ -289,14 +317,14 @@ int GameManager::Run()
         auto tickTimePhysics = std::chrono::high_resolution_clock::now();
 #endif // PROFILING
 
-        Step();
+        Step(config.GetDt());
 
 #ifdef PROFILING
         auto differencePhysics = std::chrono::high_resolution_clock::now() - tickTimePhysics;
         sumTimePhysics += std::chrono::duration_cast<std::chrono::microseconds>(differencePhysics).count();
 #endif // PROFILING
 
-        if (m_config.enableRendering)
+        if (config.enableRendering)
         {
             DebugManager::GetInstance()->Update();
             renderer->ProcessInput();
@@ -311,7 +339,7 @@ int GameManager::Run()
         sumTimeRendering += renderTime;
         if (++count == 60)
         {
-            if (m_config.enableRendering)
+            if (config.enableRendering)
                 std::cout << "Mean render time: " << sumTimeRendering / 60 << "us" << std::endl;
             std::cout << "Mean physics time: " << sumTimePhysics / 60 << "us" << std::endl;
             count = 0;
@@ -320,8 +348,9 @@ int GameManager::Run()
         }
 #endif // PROFILING
         // Do not wait if we don't render
-        if (m_config.enableRendering)
+        if (config.enableRendering)
         {
+            int64_t deltaTimeUS = static_cast<int64_t>(floorf(1000000.0f / config.fps));
             if (renderTime < deltaTimeUS)
                 std::this_thread::sleep_for(std::chrono::microseconds(deltaTimeUS - renderTime));
             else

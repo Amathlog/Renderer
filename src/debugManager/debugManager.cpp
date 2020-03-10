@@ -45,7 +45,7 @@ void DebugManager::Update()
             --(it->second.frameTimeRemaining);
 
         if (it->second.frameTimeRemaining < 0)
-            m_mapDebugFigures.erase(it);
+            it = m_mapDebugFigures.erase(it);
         else
             ++it;
     }

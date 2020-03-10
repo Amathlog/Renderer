@@ -4,23 +4,11 @@
 #include <unordered_map>
 #include <utils/utils.h>
 #include <racingGame/car.h>
+#include <racingGame/gameConfig.h>
 
 class b2World;
 class Track;
 class Scenario;
-
-struct GameConfig
-{
-    bool enableRendering        = true;
-    unsigned int windowWidth    = 800;
-    unsigned int windowHeight   = 600;
-    unsigned int fps            = 60;
-    bool humanPlay              = true;
-    bool attachCamera           = true;
-    bool debugInfo              = false;
-    bool computeRankings        = true;
-    // TODO: Add AI config
-};
 
 class GameManager
 {
@@ -41,12 +29,12 @@ public:
     void GetCarsIndexOnTrack(std::vector<unsigned int>& outVector) const;
     void UpdateCarsRanking();
 
-    float GetElapsedTime() { return m_nbFrames * m_dt; }
+    float GetElapsedTime() const;
 
 private:
     int Initialize();
 
-    void Step();
+    void Step(float dt);
 
     void ClearCars();
     void UpdateCamera();
@@ -62,7 +50,6 @@ private:
     Utils::RingBuffer<float, 5> m_smoothCameraRotation;
 
     unsigned int m_nbFrames = 0;
-    GameConfig m_config;
-    float m_dt;
+    GameConfig m_initialGameConfig;
     Scenario* m_scenario = nullptr;
 };
