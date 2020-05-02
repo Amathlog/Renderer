@@ -2,6 +2,7 @@
 
 #include <racingGame/scenarios/scenario.h>
 #include <unordered_map>
+#include <vector>
 
 class HumanCarController;
 
